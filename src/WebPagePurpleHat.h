@@ -2,7 +2,7 @@
 #define WebPagePurpleHat_h
 
 #include <Arduino.h>
-#include <Arduino_JSON.h>
+#include <ArduinoJson.h>
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 #include <ESPAsyncWiFiManager.h>
@@ -22,10 +22,7 @@ private:
 
     // Timer variables
     static unsigned long _lastTime;  
-    static unsigned long _timerDelay;
-
-    // Json Variable to Hold Sensor Readings
-    static JSONVar _readings;
+    static unsigned long _timerDelay;    
     
     static void notifyClients();
     static void handleWebSocketMessage(void *arg, uint8_t *data, size_t len);

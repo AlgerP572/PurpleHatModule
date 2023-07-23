@@ -1,14 +1,19 @@
 #include <Arduino.h>
-#include <M5StickCPlus.h>
+#include <M5Unified.h>
 #include <SPIFFS.h>
 
 #include "WebServer.h"
-#include "WebPageRoot.h"
+#include "WebPageTrackMeasuring.h"
 #include "WebPageCV.h"
 #include "WebPagePurpleHat.h"
 #include "WifiConnection.h"
 #include "WifiDebug.h"
 #include "WifiFirmware.h"
+
+#include "PurpleHatModule.h"
+
+unsigned long _lastTime;  
+unsigned long _timerDelay = 10000;
 
 void setup()
 {
@@ -43,10 +48,13 @@ void setup()
     Serial.println("An Error has occurred while mounting SPIFFS");
     return;
   }
-  server->serveStatic("/", SPIFFS, "/");  
+  server->serveStatic("/", SPIFFS, "/");
+
+  // Start underlying hardware modules
+  PurpleHatModule::setup(); 
   
   // Start supported services
-  WebPageRoot::begin(server);
+  WebPageTrackMeasuring::begin(server);
   WebPageCv::begin(server);
   WebPagePurpleHat::begin(server);
   WifiFirmware::begin(server);
@@ -59,10 +67,21 @@ void setup()
 void loop()
 { 
   u32_t time = millis();
-  WifiDebug::print("Time: ");
-  WifiDebug::print(time);
-  WifiDebug::println(" Hello!");
+
+  if ((time - _lastTime) > _timerDelay)
+  {
+    WifiDebug::print("Time: ");
+    WifiDebug::println(time);
+    _lastTime = time; 
+  }
+
+  delay(2);
+  WebPageTrackMeasuring::loop();
+  delay(2);
   WebPagePurpleHat::loop();
-  delay(10);
+  
+
+  // This will "feed the watchdog".
+  delay(2);
   return;  
 }

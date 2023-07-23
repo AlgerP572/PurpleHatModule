@@ -1,7 +1,9 @@
-#include "WebPagePurpleHat.h"
+#include "WebPageTrackMeasuring.h"
 #include "WifiDebug.h"
 
-char WebPagePurpleHat::_html[] PROGMEM = R"rawliteral(
+#include "PurpleHatModule.h"
+
+char WebPageTrackMeasuring::_html[] PROGMEM = R"rawliteral(
 <!DOCTYPE HTML><html>
 <head>
   <title>Purple Hat Sensor</title>
@@ -16,11 +18,12 @@ char WebPagePurpleHat::_html[] PROGMEM = R"rawliteral(
 </head>
 <body>
   <div class="topnav">
-    <h1>Purple Hat Sensor</h1>
+    <h1>Track Measuring Display</h1>
   </div>
   <div class="content">
     <div class="card-grid">
       <div class="card">
+        <p><button id="btnStart" class="button" onClick="startMeasuring(this)">Start</button></p>
         <p><i class="fas fa-thermometer-half" style="color:#059e8a;"></i> TEMPERATURE</p><p><span class="reading"><span id="temp">%TEMPERATURE%</span> &deg;C</span></p>
       </div>
       <div class="card">
@@ -30,42 +33,93 @@ char WebPagePurpleHat::_html[] PROGMEM = R"rawliteral(
         <p><i class="fas fa-angle-double-down" style="color:#e1e437;"></i> PRESSURE</p><p><span class="reading"><span id="pres">%PRESSURE%</span> hPa</span></p>
       </div>
       <div class="card">
-          <p class="card-title">Temperature Chart</p>
-          <div id="chart-temperature" class="chart-container"></div>
+          <p class="card-title">Speed Data</p>
+          <div id="chart-speed-data" class="chart-container"></div>
         </div>
     </div>
   </div>
-  <script src="script.js"></script>
+  <script src="TrackMeasuringDisplay.js"></script>  
 </body>
 </html>)rawliteral";
 
-AsyncWebSocket WebPagePurpleHat::_ws("/ws");
-AsyncEventSource WebPagePurpleHat::_events("/events");
-bool WebPagePurpleHat::_ledState = false;
-unsigned long  WebPagePurpleHat::_lastTime = 0;  
-unsigned long WebPagePurpleHat::_timerDelay = 1000;
-float WebPagePurpleHat::_temperature = 0;
-float WebPagePurpleHat::_humidity = 0;
-float WebPagePurpleHat::_pressure = 0;
+AsyncWebSocket WebPageTrackMeasuring::_ws("/wstrackmeasuring");
+AsyncEventSource WebPageTrackMeasuring::_events("/eventstrackmeasuring");
+bool WebPageTrackMeasuring::_ledState = false;
+unsigned long  WebPageTrackMeasuring::_lastTime = 0;  
+unsigned long WebPageTrackMeasuring::_timerDelay = 1000;
+float WebPageTrackMeasuring::_temperature = 0;
+float WebPageTrackMeasuring::_humidity = 0;
+float WebPageTrackMeasuring::_pressure = 0;
 
-void WebPagePurpleHat::notifyClients()
+void WebPageTrackMeasuring::notifyClients()
 {
   _ws.textAll(String(_ledState));
 }
 
-void WebPagePurpleHat::handleWebSocketMessage(void *arg, uint8_t *data, size_t len)
+void WebPageTrackMeasuring::handleWebSocketMessage(void *arg, uint8_t *data, size_t len)
 {
   AwsFrameInfo *info = (AwsFrameInfo*)arg;
-  if (info->final && info->index == 0 && info->len == len && info->opcode == WS_TEXT) {
+  Serial.println("WebSocket event");
+
+  if (info->final && info->index == 0 && info->len == len && info->opcode == WS_TEXT)
+  {
     data[len] = 0;
-    if (strcmp((char*)data, "toggle") == 0) {
-      _ledState = !_ledState;
-      notifyClients();
+
+    int docSize = 4096;
+    DynamicJsonDocument doc(docSize);
+    DeserializationError error = deserializeJson(doc, (char*) data);
+
+    if(error)
+    {
+      Serial.println("Error deserializing json data.");
+      return;
     }
-  }
+
+     if (doc.containsKey("Cmd") == false)
+    {
+      return;
+    }
+
+    String thisCmd = doc["Cmd"];
+
+    if(thisCmd == "SetSensor")
+    {
+      String subCmd = doc["SubCmd"];
+
+      if (subCmd == "ClearDist")
+      {
+        PurpleHatModule::ResetDistance();
+      }
+      if (subCmd == "ClearHeading")
+      {
+        PurpleHatModule::ClearHeading();           
+      }
+      if (subCmd == "RepRate")
+      {
+           
+        uint16_t repRate = doc["Val"];
+        Serial.print("RepRate");   
+
+        PurpleHatModule::RepRate(repRate);
+              // int8_t nextClient = getWSClientByPage(0, "pgPrplHatCfg");
+              // while (nextClient >= 0)
+              // {
+              //   trainSensor->setRepRate(globalClients[nextClient].wsClient, repRate);
+              //   nextClient = getWSClientByPage(nextClient, "pgPrplHatCfg");
+              // }
+      }
+    }
+
+
+
+
+   
+     Serial.println((char*) data);
+    notifyClients();
+  }  
 }
 
-void WebPagePurpleHat::onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type,
+void WebPageTrackMeasuring::onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type,
              void *arg, uint8_t *data, size_t len)
 {
     char msg[50];
@@ -96,7 +150,7 @@ void WebPagePurpleHat::onEvent(AsyncWebSocket *server, AsyncWebSocketClient *cli
     }
 }
 
-void WebPagePurpleHat::begin(AsyncWebServer* server)
+void WebPageTrackMeasuring::begin(AsyncWebServer* server)
 {
   _ws.onEvent(onEvent);
   server->addHandler(&_ws);
@@ -119,10 +173,12 @@ void WebPagePurpleHat::begin(AsyncWebServer* server)
     // and set reconnect delay to 1 second
     client->send("hello!", NULL, millis(), 1000);
   });
+
+ 
   server->addHandler(&_events);
 
   // Route for root / web page
-  server->on("/purplehat", HTTP_GET, [](AsyncWebServerRequest *request){
+  server->on("/", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send_P(200,
      "text/html",
       _html,
@@ -136,7 +192,7 @@ void WebPagePurpleHat::begin(AsyncWebServer* server)
   });
 }
 
-String  WebPagePurpleHat::processor(const String& var){
+String  WebPageTrackMeasuring::processor(const String& var){
   getSensorReadings();
   //Serial.println(var);
   if(var == "TEMPERATURE"){
@@ -151,7 +207,7 @@ String  WebPagePurpleHat::processor(const String& var){
   return String();
 }
 
-void WebPagePurpleHat::loop()
+void WebPageTrackMeasuring::loop()
 {
     if ((millis() - _lastTime) > _timerDelay)
     {
@@ -180,19 +236,31 @@ void WebPagePurpleHat::loop()
         _events.send(String(_pressure).c_str(),"pressure",millis());
 
         // send JSON object
-         _events.send(getSensorReadingsJSON().c_str(),"new_readings" ,millis());
+         _events.send(getSensorReadingsJSON().c_str(),"new_readings", millis());
+
+        // Get speed data
+        String latestSpeedData = PurpleHatModule::GetSensorData();
+        if(latestSpeedData.isEmpty() == false)
+        {
+          WifiDebug::println(latestSpeedData.c_str());
+          _events.send(latestSpeedData.c_str(),
+             "SpeedData",
+             millis());
+        }        
+
+
         _lastTime = millis();
     }
 }
 
-void WebPagePurpleHat::getSensorReadings()
+void WebPageTrackMeasuring::getSensorReadings()
 {
     _temperature += 1.0; 
     _humidity += 2;
     _pressure += 3;
 }
 
-String WebPagePurpleHat::getSensorReadingsJSON()
+String WebPageTrackMeasuring::getSensorReadingsJSON()
 {  
   DynamicJsonDocument readings(1024);
 
