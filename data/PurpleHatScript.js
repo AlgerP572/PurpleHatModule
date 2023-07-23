@@ -1,70 +1,7 @@
 // Get current sensor readings when the page loads
 window.addEventListener('load', getReadings);
-
-// Create Temperature Chart
-var chartT = new Highcharts.Chart({
-  chart:{
-    renderTo:'chart-temperature'
-  },
-  series: [
-    {
-      name: 'Temperature #1',
-      type: 'line',
-      color: '#101D42',
-      marker: {
-        symbol: 'circle',
-        radius: 3,
-        fillColor: '#101D42',
-      }
-    },
-    {
-      name: 'Temperature #2',
-      type: 'line',
-      color: '#00A6A6',
-      marker: {
-        symbol: 'square',
-        radius: 3,
-        fillColor: '#00A6A6',
-      }
-    },
-    {
-      name: 'Temperature #3',
-      type: 'line',
-      color: '#8B2635',
-      marker: {
-        symbol: 'triangle',
-        radius: 3,
-        fillColor: '#8B2635',
-      }
-    },
-    {
-      name: 'Temperature #4',
-      type: 'line',
-      color: '#71B48D',
-      marker: {
-        symbol: 'triangle-down',
-        radius: 3,
-        fillColor: '#71B48D',
-      }
-    },
-  ],
-  title: {
-    text: undefined
-  },
-  xAxis: {
-    type: 'datetime',
-    dateTimeLabelFormats: { second: '%H:%M:%S' }
-  },
-  yAxis: {
-    title: {
-      text: 'Temperature Celsius Degrees'
-    }
-  },
-  credits: {
-    enabled: false
-  }
-});
-
+window.addEventListener('load', onLoad);
+var chart;
 
 //Plot temperature in the temperature chart
 function plotTemperature(jsonValue) {
@@ -73,20 +10,13 @@ function plotTemperature(jsonValue) {
   console.log(keys);
   console.log(keys.length);
 
-  for (var i = 0; i < keys.length; i++){
-    var x = (new Date()).getTime();
-    console.log(x);
-    const key = keys[i];
-    var y = Number(jsonValue[key]);
-    console.log(y);
-
-    if(chartT.series[i].data.length > 40) {
-      chartT.series[i].addPoint([x, y], true, true, true);
-    } else {
-      chartT.series[i].addPoint([x, y], true, false, true);
-    }
-
-  }
+  var x = (new Date()).getTime();
+  chart.data.labels.push(x);
+  chart.data.datasets[0].data.push(jsonValue["sensor1"]);
+  chart.data.datasets[1].data.push(jsonValue["sensor2"]);
+  chart.data.datasets[2].data.push(jsonValue["sensor3"]);
+  chart.data.datasets[3].data.push(jsonValue["sensor4"]);
+  chart.update();
 }
 
 // Function to get current readings on the webpage when it loads for the first time
@@ -141,4 +71,41 @@ if (!!window.EventSource) {
     console.log("pressure", e.data);
     document.getElementById("pres").innerHTML = e.data;
    }, false);
+}
+
+function onLoad(event) {
+  initChart();
+}
+
+function initChart(){
+  ctx = document.getElementById("chart-speed-data").getContext("2d");
+  chart = new Chart(ctx, {
+    type: "line",
+    data: {
+      datasets: [{
+         label: "Measured Speed [mm / s]",
+         borderWidth: 1,
+         pointRadius: 2
+        },
+        {
+         label: "Measured Speed [mm / s]",
+         borderWidth: 1,
+         pointRadius: 2
+        },
+        {
+          label: "Measured Speed [mm / s]",
+          borderWidth: 1,
+          pointRadius: 2
+        },
+        {
+          label: "Measured Speed [mm / s]",
+          borderWidth: 1,
+          pointRadius: 2
+        }],
+    },
+    options: {
+      borderWidth: 3,
+      borderColor: ["rgba(255, 99, 132, 128)"]      
+    },
+  });
 }

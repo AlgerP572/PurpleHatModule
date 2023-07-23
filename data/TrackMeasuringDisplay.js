@@ -16,73 +16,9 @@ function onClose(event) {
   setTimeout(initWebSocket, 2000);
 }
 
-// Get current sensor readings when the page loads
 window.addEventListener('load', onLoad);
 
-// Create Temperature Chart
-var chartT = new Highcharts.Chart({
-  chart:{
-    renderTo:'chart-speed-data'
-  },
-  series: [
-    {
-      name: 'Measured Speed [mm/s]',
-      type: 'line',
-      color: '#71B48D',
-      marker: {
-        symbol: 'circle',
-        radius: 3,
-        fillColor: '#71B48D',
-      }
-    },
-    {
-      name: 'Temperature #2',
-      type: 'line',
-      color: '#00A6A6',
-      marker: {
-        symbol: 'square',
-        radius: 3,
-        fillColor: '#00A6A6',
-      }
-    },
-    {
-      name: 'Temperature #3',
-      type: 'line',
-      color: '#8B2635',
-      marker: {
-        symbol: 'triangle',
-        radius: 3,
-        fillColor: '#8B2635',
-      }
-    },
-    {
-      name: 'Temperature #4',
-      type: 'line',
-      color: '#71B48D',
-      marker: {
-        symbol: 'triangle-down',
-        radius: 3,
-        fillColor: '#71B48D',
-      }
-    },
-  ],
-  title: {
-    text: undefined
-  },
-  xAxis: {
-    type: 'datetime',
-    dateTimeLabelFormats: { second: '%H:%M:%S' }
-  },
-  yAxis: {
-    title: {
-      text: 'Current Speed [mm/s]'
-    }
-  },
-  credits: {
-    enabled: false
-  }
-});
-
+var chart;
 
 //Plot temperature in the temperature chart
 function plotTemperature(jsonValue) {
@@ -110,18 +46,25 @@ function plotTemperature(jsonValue) {
 function plotSpeed(jsonValue) {
 
   var data = jsonValue["Data"];
-//  console.log(data);
+  console.log(data);
 //  console.log(keys.length);  
     var x = (new Date()).getTime();
 //    console.log(x);   
     var y = Number(data["Speed"]);
 //    console.log(y);
 
-    if(chartT.series[0].data.length > 400) {
-      chartT.series[0].addPoint([x, y], true, true, true);
-    } else {
-      chartT.series[0].addPoint([x, y], true, false, true);
-    }
+   // if(chart.data.labels.length > 400) {
+      chart.data.labels.push(x);
+      chart.data.datasets[0].data.push(y);
+    //} else {
+    //  chartT.series[0].addPoint([x, y], true, false, true);
+   // }
+  chart.update();
+
+  document.getElementById("measuredspeed").innerHTML = y;
+  document.getElementById("absdistance").innerHTML = Number(data["AbsDist"]);
+  document.getElementById("reldistance").innerHTML = Number(data["RelDist"]);
+
 }
 
 // Function to get current readings on the webpage when it loads for the first time
@@ -169,24 +112,45 @@ if (!!window.EventSource) {
     plotSpeed(myObj);
   }, false);
    
-// source.addEventListener('temperature', function(e) {
-//    console.log("temperature", e.data);
-//    document.getElementById("temp").innerHTML = e.data;
-//   }, false);
+//  source.addEventListener('temperature', function(e) {
+//     console.log("temperature", e.data);
+//     document.getElementById("temp").innerHTML = e.data;
+//    }, false);
    
    source.addEventListener('humidity', function(e) {
 //    console.log("humidity", e.data);
-    document.getElementById("hum").innerHTML = e.data;
+    document.getElementById("scalespeed").innerHTML = e.data;
    }, false);
    
-   source.addEventListener('pressure', function(e) {
-//    console.log("pressure", e.data);
-    document.getElementById("pres").innerHTML = e.data;
-   }, false);
+//    source.addEventListener('pressure', function(e) {
+// //    console.log("pressure", e.data);
+//     document.getElementById("pres").innerHTML = e.data;
+//    }, false);
 }
 
 function onLoad(event) {
   initWebSocket();
+  initChart();
+}
+
+function initChart(){
+  ctx = document.getElementById("chart-speed-data").getContext("2d");
+  chart = new Chart(ctx, {
+    type: "line",
+    data: {
+      datasets: [{
+        label: "Measured Speed [mm / s]",
+        borderWidth: 1,
+        pointRadius: 2,
+        backgroundColor: '#C0FFC0',
+        borderColor: '#C0FFC0'
+      }],
+    },
+    options: {
+      borderWidth: 3,
+      borderColor: ["rgba(255, 99, 132, 128)"]           
+    },
+  });
 }
 
 function startMeasuring(sender)

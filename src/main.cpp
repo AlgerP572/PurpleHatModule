@@ -20,7 +20,7 @@ void setup()
   M5.begin(); 
   M5.Lcd.setTextSize(3);
   M5.Lcd.setRotation(3);  
-  M5.Lcd.println("DCC over WiFi");
+  M5.Lcd.println("Purple Hat");
 
   WiFi.mode(WIFI_STA); 
   Serial.begin(115200);
@@ -78,8 +78,7 @@ void loop()
   delay(2);
   WebPageTrackMeasuring::loop();
   delay(2);
-  WebPagePurpleHat::loop();
-  
+  WebPagePurpleHat::loop();  
 
   // This will "feed the watchdog".
   delay(2);

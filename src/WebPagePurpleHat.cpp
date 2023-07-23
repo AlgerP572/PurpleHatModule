@@ -8,7 +8,12 @@ char WebPagePurpleHat::_html[] PROGMEM = R"rawliteral(
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" href="data:,">
   <link rel="stylesheet" type="text/css" href="style.css">
-  <script src="https://code.highcharts.com/highcharts.js"></script>
+  <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"
+      integrity="sha512-ElRFoEQdI5Ht6kZvyzXhYG9NqjtkmlkfYk0wr6wHxU9JEHakS7UJZNeml5ALk+8IKlU6jDgMabC3vkumRokgJA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
   <style>
     .topnav { background-color: #800080; }   
     .reading { font-size: 1.4rem; }
@@ -22,20 +27,16 @@ char WebPagePurpleHat::_html[] PROGMEM = R"rawliteral(
     <div class="card-grid">
       <div class="card">
         <p><i class="fas fa-thermometer-half" style="color:#059e8a;"></i> TEMPERATURE</p><p><span class="reading"><span id="temp">%TEMPERATURE%</span> &deg;C</span></p>
-      </div>
-      <div class="card">
         <p><i class="fas fa-tint" style="color:#00add6;"></i> HUMIDITY</p><p><span class="reading"><span id="hum">%HUMIDITY%</span> &percnt;</span></p>
-      </div>
-      <div class="card">
         <p><i class="fas fa-angle-double-down" style="color:#e1e437;"></i> PRESSURE</p><p><span class="reading"><span id="pres">%PRESSURE%</span> hPa</span></p>
-      </div>
+      </div>      
       <div class="card">
           <p class="card-title">Temperature Chart</p>
-          <div id="chart-temperature" class="chart-container"></div>
+          <canvas id="chart-speed-data" width="600" height="400"></canvas>
         </div>
     </div>
   </div>
-  <script src="script.js"></script>
+  <script src="PurpleHatScript.js"></script>
 </body>
 </html>)rawliteral";
 
@@ -68,22 +69,24 @@ void WebPagePurpleHat::handleWebSocketMessage(void *arg, uint8_t *data, size_t l
 void WebPagePurpleHat::onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type,
              void *arg, uint8_t *data, size_t len)
 {
-    char msg[50];
+    char msg[64];
 
     switch (type)
     {
     case WS_EVT_CONNECT:
-        sprintf(msg,
-            "WebSocket client #%u connected from %s\n",
-            client->id(),
-            client->remoteIP().toString().c_str());
+        snprintf(msg,
+          64,
+          "WebSocket client #%u connected from %s\n",
+          client->id(),
+          client->remoteIP().toString().c_str());
         Serial.printf(msg);
         WifiDebug::print(msg);
         break;
     case WS_EVT_DISCONNECT:
-        sprintf(msg,
-            "WebSocket client #%u disconnected\n",
-            client->id());
+        snprintf(msg,
+          64,
+          "WebSocket client #%u disconnected\n",
+          client->id());
         Serial.printf(msg);
         WifiDebug::print(msg);
         break;
@@ -106,9 +109,10 @@ void WebPagePurpleHat::begin(AsyncWebServer* server)
   {
     if(client->lastId())
     {
-        char msg[50];
+        char msg[64];
 
-        sprintf(msg,
+        snprintf(msg,
+         64,
          "Client reconnected! Last message ID that it got is: %u\n",
           client->lastId());
         Serial.printf(msg);
@@ -117,7 +121,9 @@ void WebPagePurpleHat::begin(AsyncWebServer* server)
 
     // send event with message "hello!", id current millis
     // and set reconnect delay to 1 second
-    client->send("hello!", NULL, millis(), 1000);
+    Serial.printf("Send Hello");
+    client->send("hello!", "", millis(), 1000);
+    Serial.printf("Send Hello Done");
   });
   server->addHandler(&_events);
 
@@ -157,19 +163,22 @@ void WebPagePurpleHat::loop()
     {
         getSensorReadings();
         char msg[50];
-        sprintf(msg,
-            "Temperature = %.2f ºC \n",
-            _temperature);
+        snprintf(msg,
+         50,
+          "Temperature = %.2f ºC \n",
+          _temperature);
         WifiDebug::print(msg);
         
-        sprintf(msg,
-            "Humidity = %.2f \n",
-             _humidity);
+        snprintf(msg,
+         50,
+         "Humidity = %.2f \n",
+         _humidity);
         WifiDebug::print(msg);
         
-        sprintf(msg,
-            "Pressure = %.2f hPa \n",
-             _pressure);
+        snprintf(msg,
+          50,
+          "Pressure = %.2f hPa \n",
+          _pressure);
         WifiDebug::print(msg);
         WifiDebug::println("-----");
 

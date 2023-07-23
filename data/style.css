@@ -42,3 +42,15 @@ html {
     padding-right: 5%;
     padding-left: 5%;
   }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+  th, td {
+    text-align: left;
+    padding: 8px;
+  }
+  tr:nth-child(even){
+  background-color: #D6EEEE;
+  }
