@@ -50,7 +50,7 @@ float WebPagePurpleHat::_humidity = 0;
 float WebPagePurpleHat::_pressure = 0;
 
 void WebPagePurpleHat::notifyClients()
-{
+{  
   _ws.textAll(String(_ledState));
 }
 

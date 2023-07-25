@@ -103,11 +103,6 @@ float WebPageTrackMeasuring::_humidity = 0;
 float WebPageTrackMeasuring::_pressure = 0;
 char  WebPageTrackMeasuring::_wsTxBuffer[16384];
 
-void WebPageTrackMeasuring::notifyClients()
-{
-  _ws.textAll(String(_ledState));
-}
-
 void WebPageTrackMeasuring::handleWebSocketMessage(void *arg, uint8_t *data, size_t len)
 {
   AwsFrameInfo *info = (AwsFrameInfo*)arg;
@@ -179,8 +174,6 @@ void WebPageTrackMeasuring::handleWebSocketMessage(void *arg, uint8_t *data, siz
              "CfgData",
              millis());
       }
-    
-    notifyClients();
   }  
 }
 
