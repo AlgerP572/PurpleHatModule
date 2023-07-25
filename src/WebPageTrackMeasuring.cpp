@@ -2,6 +2,7 @@
 #include "WifiDebug.h"
 
 #include "PurpleHatModule.h"
+#include "ConfigLoader.h"
 
 char WebPageTrackMeasuring::_html[] PROGMEM = R"rawliteral(
 <!DOCTYPE HTML><html>
@@ -35,11 +36,36 @@ char WebPageTrackMeasuring::_html[] PROGMEM = R"rawliteral(
           <th>Value</th>
           <th>Units</th>          
         </tr>
+         <tr>
+          <td>Scale</td>
+          <td><span id="scale">%Scale%</span></td>
+          <td><span id="scaleunit">%Scaleunit%</span></td>        
+        </tr>
+        <tr>
+          <td>Wheel Diameter</td>
+          <td><span id="wheeldiameter">%Wheel Diameter%</span></td>
+          <td>[mm]</td>          
+        </tr>
+         <tr>
+          <td>Angle</td>
+          <td><span id="angle">%angle%</span></td>
+          <td>[°]</td>          
+        </tr>
+         <tr>
+          <td>Reverse Direction</td>
+          <td><span id="reversedirection">%reversedirection%</span></td>
+          <td></td>          
+        </tr>
+        <tr>
+          <td>Direction</td>
+          <td><span id="direction">%Direction%</span></td>
+          <td></td>          
+        </tr>
         <tr>
           <td>Measured Speed</td>
           <td><span id="measuredspeed">%Measured Soeed%</span></td>
           <td>[mm/s]</td>          
-        </tr>
+        </tr>        
         <tr>
           <td>Scale Speed</td>
           <td><span id="scalespeed">%scalespeed%</span></td>
@@ -75,6 +101,7 @@ unsigned long WebPageTrackMeasuring::_timerDelay = 1000;
 float WebPageTrackMeasuring::_temperature = 0;
 float WebPageTrackMeasuring::_humidity = 0;
 float WebPageTrackMeasuring::_pressure = 0;
+char  WebPageTrackMeasuring::_wsTxBuffer[16384];
 
 void WebPageTrackMeasuring::notifyClients()
 {
@@ -106,10 +133,12 @@ void WebPageTrackMeasuring::handleWebSocketMessage(void *arg, uint8_t *data, siz
     }
 
     String thisCmd = doc["Cmd"];
+    Serial.println(thisCmd.c_str());
 
     if(thisCmd == "SetSensor")
     {
       String subCmd = doc["SubCmd"];
+      Serial.println(subCmd.c_str());
 
       if (subCmd == "ClearDist")
       {
@@ -122,24 +151,35 @@ void WebPageTrackMeasuring::handleWebSocketMessage(void *arg, uint8_t *data, siz
       if (subCmd == "RepRate")
       {
            
-        uint16_t repRate = doc["Val"];
-        Serial.print("RepRate");   
-
-        PurpleHatModule::RepRate(repRate);
-              // int8_t nextClient = getWSClientByPage(0, "pgPrplHatCfg");
-              // while (nextClient >= 0)
-              // {
-              //   trainSensor->setRepRate(globalClients[nextClient].wsClient, repRate);
-              //   nextClient = getWSClientByPage(nextClient, "pgPrplHatCfg");
-              // }
-      }
+        uint16_t repRate = doc["Val"]; 
+        PurpleHatModule::RepRate(repRate);              
+      }      
     }
+    if (thisCmd == "CfgData") //Config Request Format: {"Cmd":"CfgData", "Type":"pgxxxxCfg", "FileName":"name"}
+      {        
+        String cmdType = doc["Type"];
+        String fileName = doc["FileName"];
 
+        char cmdMsg[50];
 
+        snprintf(cmdMsg,
+         50,
+          "Request for config file: %s.",
+           fileName.c_str());
+        Serial.println(cmdMsg);
 
-
-   
-     Serial.println((char*) data);
+        strcpy(_wsTxBuffer, "{\"Cmd\":\"CfgData\", \"ResetData\":true, ");
+        uint32_t retStr = strlen(_wsTxBuffer);
+        strcat(_wsTxBuffer, "\"Type\":\"");
+        strcat(_wsTxBuffer, cmdType.c_str());
+        strcat(_wsTxBuffer, "\",\"Data\":");
+        ConfigLoader::readFileToBuffer("/configdata/" + fileName, &_wsTxBuffer[strlen(_wsTxBuffer)], 16384 - strlen(_wsTxBuffer));
+        strcat(_wsTxBuffer, "}");
+         _events.send(_wsTxBuffer,
+             "CfgData",
+             millis());
+      }
+    
     notifyClients();
   }  
 }
@@ -263,13 +303,13 @@ void WebPageTrackMeasuring::loop()
         WifiDebug::println("-----");
 
         // Send Events to the Web Client with the Sensor Readings
-        _events.send("ping",NULL,millis());
+        _events.send("ping","",millis());
         _events.send(String(_temperature).c_str(),"temperature",millis());
         _events.send(String(_humidity).c_str(),"humidity",millis());
         _events.send(String(_pressure).c_str(),"pressure",millis());
 
         // send JSON object
-         _events.send(getSensorReadingsJSON().c_str(),"new_readings", millis());
+        _events.send(getSensorReadingsJSON().c_str(),"new_readings", millis());
 
         // Get speed data
         String latestSpeedData = PurpleHatModule::GetSensorData();

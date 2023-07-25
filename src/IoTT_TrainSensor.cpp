@@ -31,6 +31,7 @@ void myTask(void * thisParam)
 	IoTT_TrainSensor * thisObj = (IoTT_TrainSensor*)thisParam;
 	while(1)
 	{
+//		Serial.printf("ST");		
 		thisObj->sensorTask(NULL);
 
 		// feed watch dog
@@ -68,6 +69,9 @@ volatile void IoTT_TrainSensor::sensorTask(void * thisParam)
 				if ((abs(revCtr) > 3))
 				{
 					magSensor->setFluxOffset();
+					workData.avgMove = 0;
+					workData.absIntegrator = 0;
+					workData.relIntegrator = 0;
 					magCalibrated = true;
 				}
 			}

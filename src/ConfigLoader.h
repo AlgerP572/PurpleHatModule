@@ -9,11 +9,11 @@ class ConfigLoader
 { 
 private:    
     static char _wsTxBuffer[BufferSize];
-
-    static uint32_t readFileToBuffer(String fileName, char * thisBuffer, uint32_t maxSize); 
+   
 
 public:    
     static DynamicJsonDocument* getDocPtr(String cmdFile, bool duplData);
+     static uint32_t readFileToBuffer(String fileName, char * thisBuffer, uint32_t maxSize); 
 };
 
 #endif

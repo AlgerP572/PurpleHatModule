@@ -15,6 +15,7 @@ private:
     static AsyncWebSocket _ws;
     static AsyncEventSource _events;
     static bool _ledState;
+    static char _wsTxBuffer[16384];
 
     static float _temperature;
     static float _humidity;
@@ -30,7 +31,7 @@ private:
                  AwsEventType type, void *arg, uint8_t *data, size_t len);
     static String processor(const String& var);
     static void getSensorReadings();
-    static String getSensorReadingsJSON();
+    static String getSensorReadingsJSON();    
 
 public:
     static void begin(AsyncWebServer* server);
