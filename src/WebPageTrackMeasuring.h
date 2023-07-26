@@ -16,6 +16,9 @@ private:
     static AsyncEventSource _events;
     static bool _ledState;
     static char _wsTxBuffer[16384];
+    static int _millisRollOver;
+    static unsigned long _lastMillis;
+    static String BBVersion;
 
     static float _temperature;
     static float _humidity;

@@ -1,6 +1,7 @@
 var gateway = `ws://${window.location.hostname}/wstrackmeasuring`;
 var websocket;
 var configData;
+var statsData;
 
 function initWebSocket() {
   console.log('Trying to open a Track Measuring WebSocket connection...');
@@ -46,35 +47,54 @@ function plotTemperature(jsonValue) {
 
 function plotSpeed(jsonValue) {
 
-  var data = jsonValue["Data"];
+  var data = jsonValue.Data;
   console.log(data);
-//  console.log(keys.length);  
-    var x = (new Date()).getTime();
-//    console.log(x);   
-    var y = Number(data["Speed"]);
-//    console.log(y);
+  var x = (new Date()).getTime();
+  var y = Number(data.Speed);
 
-   // if(chart.data.labels.length > 400) {
+  document.getElementById("angle").innerHTML = data.AxisAngle.toFixed(2);
+  document.getElementById("measuredspeed").innerHTML = y.toFixed(2);
+  document.getElementById("direction").innerHTML = y > 0 ? "Forward" : y< 0 ? "Backward" : "Parked";
+  document.getElementById("absdistance").innerHTML = data.AbsDist.toFixed(2);
+  document.getElementById("reldistance").innerHTML = data.RelDist.toFixed(2);
+
+  var scaleSpeed = (y  * 36 * Number(configData.ScaleList[configData.ScaleIndex].Scale)) / 10000; //[km/h]
+  document.getElementById("scalespeed").innerHTML = scaleSpeed.toFixed(2);
+
+     // if(chart.data.labels.length > 400) {
       chart.data.labels.push(x);
       chart.data.datasets[0].data.push(y);
+      chart.data.datasets[1].data.push(scaleSpeed);
     //} else {
     //  chartT.series[0].addPoint([x, y], true, false, true);
    // }
   chart.update();
-
-  document.getElementById("angle").innerHTML = data.AxisAngle;
-  document.getElementById("measuredspeed").innerHTML = y;
-  document.getElementById("direction").innerHTML = y > 0 ? "Forward" : y< 0 ? "Backward" : "Parked";
-  document.getElementById("absdistance").innerHTML = Number(data["AbsDist"]);
-  document.getElementById("reldistance").innerHTML = Number(data["RelDist"]);
 }
 
 function  UpdateUI()
 {
-  document.getElementById("wheeldiameter").innerHTML = configData.WheelDia
+  document.getElementById("wheeldiameter").innerHTML = configData.WheelDia.toFixed(2);
   document.getElementById("scale").innerHTML = configData.ScaleList[configData.ScaleIndex].Name;
   document.getElementById("scaleunit").innerHTML = "1:" + configData.ScaleList[configData.ScaleIndex].Scale;
   document.getElementById("reversedirection").innerHTML = configData.ReverseDir;
+}
+
+function  UpdateFooter()
+{
+  document.getElementById("datetime").innerHTML = statsData.systime; 
+  document.getElementById("ipaddress").innerHTML = statsData.ipaddress;
+  document.getElementById("fwversion").innerHTML = statsData.version;
+  
+  document.getElementById("systemuptime").innerHTML = formatTime(Math.trunc(statsData.uptime/1000)); 
+  document.getElementById("signalstrength").innerHTML = statsData.sigstrength  + " dBm";
+  document.getElementById("ramflash").innerHTML = statsData.freemem + " / " + statsData.freedisk + " Bytes";
+
+  document.getElementById("coretemp").innerHTML = statsData.temp.toFixed(2) + "\u00B0C"; 
+  document.getElementById("accesspoint").innerHTML = statsData.apname;
+  document.getElementById("batvoltage").innerHTML = statsData.ubat.toFixed(2) + " V";
+
+  document.getElementById("extvoltage").innerHTML = statsData.uin.toFixed(2) + " V";
+  document.getElementById("batcurrent").innerHTML = statsData.ibat.toFixed(2) + " mA";  
 }
 
 // Function to get current readings on the webpage when it loads for the first time
@@ -129,6 +149,15 @@ if (!!window.EventSource) {
     configData = myObj["Data"];
     UpdateUI();
   }, false);
+
+  source.addEventListener('STATS', function(e) {
+    //console.log("Track Measuring new_readings", e.data);
+    var myObj = JSON.parse(e.data);
+    console.log(myObj);
+    statsData = myObj["Data"];
+    UpdateFooter();
+  }, false);
+  
    
 //  source.addEventListener('temperature', function(e) {
 //     console.log("temperature", e.data);
@@ -137,7 +166,7 @@ if (!!window.EventSource) {
    
    source.addEventListener('humidity', function(e) {
 //    console.log("humidity", e.data);
-    document.getElementById("scalespeed").innerHTML = e.data;
+//    document.getElementById("scalespeed").innerHTML = e.data;
    }, false);
    
 //    source.addEventListener('pressure', function(e) {
@@ -158,17 +187,43 @@ function initChart(){
     type: "line",
     data: {
       datasets: [{
-        label: "Measured Speed [mm / s]",
+        label: "Measured Speed [mm/s]",
         borderWidth: 1,
         pointRadius: 2,
         backgroundColor: '#80C080',
-        borderColor: '#80C080'
+        borderColor: '#80C080',
+        yAxisID: 'y',
+      },
+      {
+        label:"Scale Speed [km/h]",
+        borderWidth: 1,
+        pointRadius: 2,
+        backgroundColor: '#8080C0',
+        borderColor: '#8080C0',
+        yAxisID: 'y1',
       }],
     },
     options: {
       borderWidth: 3,
-      borderColor: ["rgba(255, 99, 132, 128)"]           
-    },
+      borderColor: ["rgba(255, 99, 132, 128)"],
+      scales: {
+        y: {
+          type: 'linear',
+          display: true,
+          position: 'left',
+        },
+        y1: {
+          type: 'linear',
+          display: true,
+          position: 'right',
+  
+          // grid line settings
+          grid: {
+            drawOnChartArea: false, // only want the grid lines for one axis to show up
+          },
+        }
+      }           
+    },    
   });
 }
 
@@ -190,6 +245,7 @@ function startMeasuring(sender)
 function getConfig()
 {
   sendMessage(websocket, "{\"Cmd\":\"CfgData\", \"Type\":\"TODO:ID\", \"FileName\":\"phcfg.cfg\"}");
+  sendMessage(websocket, "{\"Cmd\":\"STATS\"}");
 }
 
 function waitForOpenConnection(socket) {
@@ -221,4 +277,14 @@ async function sendMessage (socket, msg)
   } else {
       socket.send(msg)
   }
+}
+
+function formatTime(seconds) {
+  return [
+      parseInt(seconds / 60 / 60),
+      parseInt(seconds / 60 % 60),
+      parseInt(seconds % 60)
+  ]
+      .join(":")
+      .replace(/\b(\d)\b/g, "0$1")
 }

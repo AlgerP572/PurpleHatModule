@@ -29,8 +29,11 @@ char WebPageTrackMeasuring::_html[] PROGMEM = R"rawliteral(
   <div class="content">
     <div class="card-grid">
       <div class="card">
-        <p><button id="btnStart" class="button" onClick="startMeasuring(this)">Start</button></p>        
-        <p><table>
+        <div class="button-container">
+          <button id="btnStart" class="button" onClick="startMeasuring(this)">Start</button>
+          <button id="btnStart" class="button" onClick="startMeasuring(this)">Reset Distance</button>
+        </div>                   
+        <p><table class="datatable">
         <tr>
           <th>Data</th>
           <th>Value</th>
@@ -49,7 +52,7 @@ char WebPageTrackMeasuring::_html[] PROGMEM = R"rawliteral(
          <tr>
           <td>Angle</td>
           <td><span id="angle">%angle%</span></td>
-          <td>[°]</td>          
+          <td>[&deg]</td>          
         </tr>
          <tr>
           <td>Reverse Direction</td>
@@ -89,6 +92,42 @@ char WebPageTrackMeasuring::_html[] PROGMEM = R"rawliteral(
         </div>
     </div>
   </div>
+  <div class="topnav">
+    <p><table class="footertable">
+      <tr>
+        <td>Date / Time</th>
+        <td><span id="datetime">%datetime%</span></th>
+        <td>IP Address</th>
+        <td><span id="ipaddress">%datetime%</span></th>
+        <td>Firmware Version</th>
+        <td><span id="fwversion">%datetime%</span></th>    
+      </tr>
+      <tr>
+        <td>System Uptime</th>
+        <td><span id="systemuptime">%datetime%</span></th>
+        <td>Signal Strength</th>
+        <td><span id="signalstrength">%datetime%</span></th>
+        <td>Available RAM/Flash</th>
+        <td><span id="ramflash">%datetime%</span></th>    
+      </tr>
+      <tr>
+        <td>Core Temp</th>
+        <td><span id="coretemp">%datetime%</span></th>
+        <td>Access Point</th>
+        <td><span id="accesspoint">%datetime%</span></th>
+        <td>Bat. Voltage</th>
+        <td><span id="batvoltage">%datetime%</span></th>    
+      </tr>
+      <tr>
+        <td>Ext Voltage</th>
+        <td><span id="extvoltage">%datetime%</span></th>
+        <td></th>
+        <td></th>
+        <td>Bat. Current</th>
+        <td><span id="batcurrent">%datetime%</span>...</th>    
+      </tr>
+    </table></p>
+  </div>
   <script src="TrackMeasuringDisplay.js"></script>  
 </body>
 </html>)rawliteral";
@@ -101,7 +140,10 @@ unsigned long WebPageTrackMeasuring::_timerDelay = 1000;
 float WebPageTrackMeasuring::_temperature = 0;
 float WebPageTrackMeasuring::_humidity = 0;
 float WebPageTrackMeasuring::_pressure = 0;
-char  WebPageTrackMeasuring::_wsTxBuffer[16384];
+char WebPageTrackMeasuring::_wsTxBuffer[16384];
+int WebPageTrackMeasuring::_millisRollOver = 0;
+unsigned long WebPageTrackMeasuring::_lastMillis = 0;
+String WebPageTrackMeasuring::BBVersion = "1.6.0";
 
 void WebPageTrackMeasuring::handleWebSocketMessage(void *arg, uint8_t *data, size_t len)
 {
@@ -151,31 +193,73 @@ void WebPageTrackMeasuring::handleWebSocketMessage(void *arg, uint8_t *data, siz
       }      
     }
     if (thisCmd == "CfgData") //Config Request Format: {"Cmd":"CfgData", "Type":"pgxxxxCfg", "FileName":"name"}
-      {        
-        String cmdType = doc["Type"];
-        String fileName = doc["FileName"];
+    {        
+      String cmdType = doc["Type"];
+      String fileName = doc["FileName"];
 
-        char cmdMsg[50];
+      char cmdMsg[50];
 
-        snprintf(cmdMsg,
+      snprintf(cmdMsg,
          50,
-          "Request for config file: %s.",
-           fileName.c_str());
-        Serial.println(cmdMsg);
+        "Request for config file: %s.",
+         fileName.c_str());
+      Serial.println(cmdMsg);
 
-        strcpy(_wsTxBuffer, "{\"Cmd\":\"CfgData\", \"ResetData\":true, ");
-        uint32_t retStr = strlen(_wsTxBuffer);
-        strcat(_wsTxBuffer, "\"Type\":\"");
-        strcat(_wsTxBuffer, cmdType.c_str());
-        strcat(_wsTxBuffer, "\",\"Data\":");
-        ConfigLoader::readFileToBuffer("/configdata/" + fileName, &_wsTxBuffer[strlen(_wsTxBuffer)], 16384 - strlen(_wsTxBuffer));
-        strcat(_wsTxBuffer, "}");
-         _events.send(_wsTxBuffer,
-             "CfgData",
-             millis());
+      strcpy(_wsTxBuffer, "{\"Cmd\":\"CfgData\", \"ResetData\":true, ");
+      uint32_t retStr = strlen(_wsTxBuffer);
+      strcat(_wsTxBuffer, "\"Type\":\"");
+      strcat(_wsTxBuffer, cmdType.c_str());
+      strcat(_wsTxBuffer, "\",\"Data\":");
+      ConfigLoader::readFileToBuffer("/configdata/" + fileName, &_wsTxBuffer[strlen(_wsTxBuffer)], 16384 - strlen(_wsTxBuffer));
+      strcat(_wsTxBuffer, "}");
+      _events.send(_wsTxBuffer,
+        "CfgData",
+        millis());
       }
-  }  
-}
+      if(thisCmd == "STATS")
+      {        
+        Serial.println("Keep alive");
+        DynamicJsonDocument doc(640);
+//        char myStatusMsg[600];
+        doc["Cmd"] = "STATS";
+        JsonObject Data = doc.createNestedObject("Data");
+        float float1 = (_millisRollOver * 4294967296) + millis(); //calculate millis including rollovers
+        Data["uptime"] = round(float1);
+        //  Data["uptime"] = millis();
+        
+        time_t now; now = time(0);
+//    char buff[40]; //39 digits plus the null char
+        strftime(_wsTxBuffer, 40, "%m-%d-%Y %H:%M:%S", localtime(&now));
+        Data["systime"] = _wsTxBuffer;
+
+        Data["freemem"] = String(ESP.getFreeHeap());
+        Data["totaldisk"] = String(SPIFFS.totalBytes());
+        Data["useddisk"] = String(SPIFFS.usedBytes());
+        Data["freedisk"] = String(SPIFFS.totalBytes() - SPIFFS.usedBytes());
+        sprintf(_wsTxBuffer, "%s", BBVersion.c_str());
+        Data["version"] = _wsTxBuffer;
+        Data["ipaddress"] = WiFi.localIP().toString();
+        Data["sigstrength"] = WiFi.RSSI();
+        Data["apname"] = WiFi.SSID();
+
+        Data["temp"] = M5.Power.Axp192.getInternalTemperature();
+        Data["ubat"] = M5.Power.Axp192.getBatteryVoltage();
+        Data["ibat"] =  M5.Power.Axp192.getBatteryDischargeCurrent();
+        Data["pwrbat"] = M5.Power.Axp192.getBatteryPower();
+        Data["ubus"] = M5.Power.Axp192.getVBUSVoltage();
+        Data["ibus"] = M5.Power.Axp192.getVBUSCurrent();
+        Data["uin"] = M5.Power.Axp192.getACINVolatge();
+        Data["iin"] = M5.Power.Axp192.getACINCurrent();
+
+        serializeJson(doc,_wsTxBuffer);
+        Serial.println(_wsTxBuffer);
+        _events.send(_wsTxBuffer,
+          "STATS",
+          millis());
+    }
+  }
+}  
+
 
 void WebPageTrackMeasuring::onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type,
              void *arg, uint8_t *data, size_t len)
@@ -231,10 +315,8 @@ void WebPageTrackMeasuring::begin(AsyncWebServer* server)
     }
 
     // send event with message "hello!", id current millis
-    // and set reconnect delay to 1 second
-    Serial.printf("Send Hello");
+    // and set reconnect delay to 1 second   
     client->send("hello!", "", millis(), 1000);
-    Serial.printf("Send Hello Done");
   });
 
  
@@ -272,6 +354,11 @@ String  WebPageTrackMeasuring::processor(const String& var){
 
 void WebPageTrackMeasuring::loop()
 {
+    if (millis() < _lastMillis)
+      _millisRollOver++; //update ms rollover counter
+    else
+      _lastMillis = millis();  
+
     if ((millis() - _lastTime) > _timerDelay)
     {
         getSensorReadings();
@@ -296,6 +383,7 @@ void WebPageTrackMeasuring::loop()
         WifiDebug::println("-----");
 
         // Send Events to the Web Client with the Sensor Readings
+        
         _events.send("ping","",millis());
         _events.send(String(_temperature).c_str(),"temperature",millis());
         _events.send(String(_humidity).c_str(),"humidity",millis());
@@ -308,7 +396,7 @@ void WebPageTrackMeasuring::loop()
         String latestSpeedData = PurpleHatModule::GetSensorData();
         if(latestSpeedData.isEmpty() == false)
         {
-          WifiDebug::println(latestSpeedData.c_str());
+          WifiDebug::println(latestSpeedData.c_str());         
           _events.send(latestSpeedData.c_str(),
              "SpeedData",
              millis());

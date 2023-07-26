@@ -19,6 +19,19 @@ html {
   body {
     margin: 0;
   }
+
+  .button {
+    border: 1px solid black ;
+    background-color: #D4C0D4;
+    height: 40px;
+    width: 120px;
+   }
+
+   .button-container {
+    display: flex;
+    padding: 10px 24px; 
+  }
+
   .content {
     padding: 5%;
   }
@@ -43,14 +56,24 @@ html {
     padding-left: 5%;
   }
 
-  table {
+  table.datatable {
     border-collapse: collapse;
     width: 100%;
   }
-  th, td {
+  table.datatable th, table.datatable td {
     text-align: left;
     padding: 8px;
   }
-  tr:nth-child(even){
+  table.datatable tr:nth-child(even){
   background-color: #D6EEEE;
+  }
+
+  table.footertable {
+    border-collapse: collapse;
+    width: 100%;
+  }
+  table.footertable th, table.footertable td {
+    text-align: left;
+    padding: 2px;
+    color: #FFFFFF;
   }
