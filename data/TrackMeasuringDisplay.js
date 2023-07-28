@@ -242,6 +242,11 @@ function startMeasuring(sender)
 	}
 }
 
+function resetDistance(sender)
+{
+	sendMessage(websocket, "{\"Cmd\":\"SetSensor\", \"SubCmd\":\"ClearDist\"}");	
+}
+
 function getConfig()
 {
   sendMessage(websocket, "{\"Cmd\":\"CfgData\", \"Type\":\"TODO:ID\", \"FileName\":\"phcfg.cfg\"}");

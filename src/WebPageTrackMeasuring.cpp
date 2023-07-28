@@ -31,7 +31,7 @@ char WebPageTrackMeasuring::_html[] PROGMEM = R"rawliteral(
       <div class="card">
         <div class="button-container">
           <button id="btnStart" class="button" onClick="startMeasuring(this)">Start</button>
-          <button id="btnStart" class="button" onClick="startMeasuring(this)">Reset Distance</button>
+          <button id="btnStart" class="button" onClick=" resetDistance(this)">Reset Distance</button>
         </div>                   
         <p><table class="datatable">
         <tr>
@@ -135,7 +135,7 @@ char WebPageTrackMeasuring::_html[] PROGMEM = R"rawliteral(
 AsyncWebSocket WebPageTrackMeasuring::_ws("/wstrackmeasuring");
 AsyncEventSource WebPageTrackMeasuring::_events("/eventstrackmeasuring");
 bool WebPageTrackMeasuring::_ledState = false;
-unsigned long  WebPageTrackMeasuring::_lastTime = 0;  
+unsigned long WebPageTrackMeasuring::_lastTime = 0;
 unsigned long WebPageTrackMeasuring::_timerDelay = 1000;
 float WebPageTrackMeasuring::_temperature = 0;
 float WebPageTrackMeasuring::_humidity = 0;
@@ -147,143 +147,133 @@ String WebPageTrackMeasuring::BBVersion = "1.6.0";
 
 void WebPageTrackMeasuring::handleWebSocketMessage(void *arg, uint8_t *data, size_t len)
 {
-  AwsFrameInfo *info = (AwsFrameInfo*)arg;
-  Serial.println("WebSocket event");
+    AwsFrameInfo *info = (AwsFrameInfo *)arg;
+    WifiDebug::println("WebSocket event");
 
-  if (info->final && info->index == 0 && info->len == len && info->opcode == WS_TEXT)
-  {
-    data[len] = 0;
-
-    int docSize = 4096;
-    DynamicJsonDocument doc(docSize);
-    DeserializationError error = deserializeJson(doc, (char*) data);
-
-    if(error)
+    if (info->final && info->index == 0 && info->len == len && info->opcode == WS_TEXT)
     {
-      Serial.println("Error deserializing json data.");
-      return;
-    }
+        data[len] = 0;
 
-     if (doc.containsKey("Cmd") == false)
-    {
-      return;
-    }
+        int docSize = 4096;
+        DynamicJsonDocument doc(docSize);
+        DeserializationError error = deserializeJson(doc, (char *)data);
 
-    String thisCmd = doc["Cmd"];
-    Serial.println(thisCmd.c_str());
+        if (error)
+        {
+            WifiDebug::println("Error deserializing json data.");
+            return;
+        }
 
-    if(thisCmd == "SetSensor")
-    {
-      String subCmd = doc["SubCmd"];
-      Serial.println(subCmd.c_str());
+        if (doc.containsKey("Cmd") == false)
+        {
+            return;
+        }
 
-      if (subCmd == "ClearDist")
-      {
-        PurpleHatModule::ResetDistance();
-      }
-      if (subCmd == "ClearHeading")
-      {
-        PurpleHatModule::ClearHeading();           
-      }
-      if (subCmd == "RepRate")
-      {
+        String thisCmd = doc["Cmd"];
+        WifiDebug::println(thisCmd);
+
+        if (thisCmd == "SetSensor")
+        {
+            String subCmd = doc["SubCmd"];
+            WifiDebug::println(subCmd);
+
+            if (subCmd == "ClearDist")
+            {
+                PurpleHatModule::ResetDistance();
+            }
+            if (subCmd == "ClearHeading")
+            {
+                PurpleHatModule::ClearHeading();
+            }
+            if (subCmd == "RepRate")
+            {
+
+                uint16_t repRate = doc["Val"];
+                PurpleHatModule::RepRate(repRate);
+            }
+        }
+        if (thisCmd == "CfgData") // Config Request Format: {"Cmd":"CfgData", "Type":"pgxxxxCfg", "FileName":"name"}
+        {
+            String cmdType = doc["Type"];
+            String fileName = doc["FileName"];
+            
+            WifiDebug::print("Request for config file: ");
+            WifiDebug::println(fileName);
+
+            String cmdMsg;
+            cmdMsg.reserve(512);
+            cmdMsg += "{\"Cmd\":\"CfgData\", \"ResetData\":true, \"Type\":\"";
+            cmdMsg += cmdType; 
+            cmdMsg += "\",\"Data\":";
+            
+            String configData;
+            ConfigLoader::readFile("/configdata/" + fileName, configData);            
+            cmdMsg += configData;
+            cmdMsg += "}";
            
-        uint16_t repRate = doc["Val"]; 
-        PurpleHatModule::RepRate(repRate);              
-      }      
+            _events.send(cmdMsg.c_str(),
+                        "CfgData",
+                         millis());
+        }
+        if (thisCmd == "STATS")
+        {
+            DynamicJsonDocument doc(640);
+            //        char myStatusMsg[600];
+            doc["Cmd"] = "STATS";
+            JsonObject Data = doc.createNestedObject("Data");
+            float float1 = (_millisRollOver * 4294967296) + millis(); // calculate millis including rollovers
+            Data["uptime"] = round(float1);
+            //  Data["uptime"] = millis();
+
+            time_t now;
+            now = time(0);
+            //    char buff[40]; //39 digits plus the null char
+            strftime(_wsTxBuffer, 40, "%m-%d-%Y %H:%M:%S", localtime(&now));
+            Data["systime"] = _wsTxBuffer;
+
+            Data["freemem"] = String(ESP.getFreeHeap());
+            Data["totaldisk"] = String(SPIFFS.totalBytes());
+            Data["useddisk"] = String(SPIFFS.usedBytes());
+            Data["freedisk"] = String(SPIFFS.totalBytes() - SPIFFS.usedBytes());
+            sprintf(_wsTxBuffer, "%s", BBVersion.c_str());
+            Data["version"] = _wsTxBuffer;
+            Data["ipaddress"] = WiFi.localIP().toString();
+            Data["sigstrength"] = WiFi.RSSI();
+            Data["apname"] = WiFi.SSID();
+
+            Data["temp"] = M5.Power.Axp192.getInternalTemperature();
+            Data["ubat"] = M5.Power.Axp192.getBatteryVoltage();
+            Data["ibat"] = M5.Power.Axp192.getBatteryDischargeCurrent();
+            Data["pwrbat"] = M5.Power.Axp192.getBatteryPower();
+            Data["ubus"] = M5.Power.Axp192.getVBUSVoltage();
+            Data["ibus"] = M5.Power.Axp192.getVBUSCurrent();
+            Data["uin"] = M5.Power.Axp192.getACINVolatge();
+            Data["iin"] = M5.Power.Axp192.getACINCurrent();
+
+            serializeJson(doc, _wsTxBuffer);
+            WifiDebug::println(_wsTxBuffer);
+            _events.send(_wsTxBuffer,
+                         "STATS",
+                         millis());
+        }
     }
-    if (thisCmd == "CfgData") //Config Request Format: {"Cmd":"CfgData", "Type":"pgxxxxCfg", "FileName":"name"}
-    {        
-      String cmdType = doc["Type"];
-      String fileName = doc["FileName"];
-
-      char cmdMsg[50];
-
-      snprintf(cmdMsg,
-         50,
-        "Request for config file: %s.",
-         fileName.c_str());
-      Serial.println(cmdMsg);
-
-      strcpy(_wsTxBuffer, "{\"Cmd\":\"CfgData\", \"ResetData\":true, ");
-      uint32_t retStr = strlen(_wsTxBuffer);
-      strcat(_wsTxBuffer, "\"Type\":\"");
-      strcat(_wsTxBuffer, cmdType.c_str());
-      strcat(_wsTxBuffer, "\",\"Data\":");
-      ConfigLoader::readFileToBuffer("/configdata/" + fileName, &_wsTxBuffer[strlen(_wsTxBuffer)], 16384 - strlen(_wsTxBuffer));
-      strcat(_wsTxBuffer, "}");
-      _events.send(_wsTxBuffer,
-        "CfgData",
-        millis());
-      }
-      if(thisCmd == "STATS")
-      {        
-        Serial.println("Keep alive");
-        DynamicJsonDocument doc(640);
-//        char myStatusMsg[600];
-        doc["Cmd"] = "STATS";
-        JsonObject Data = doc.createNestedObject("Data");
-        float float1 = (_millisRollOver * 4294967296) + millis(); //calculate millis including rollovers
-        Data["uptime"] = round(float1);
-        //  Data["uptime"] = millis();
-        
-        time_t now; now = time(0);
-//    char buff[40]; //39 digits plus the null char
-        strftime(_wsTxBuffer, 40, "%m-%d-%Y %H:%M:%S", localtime(&now));
-        Data["systime"] = _wsTxBuffer;
-
-        Data["freemem"] = String(ESP.getFreeHeap());
-        Data["totaldisk"] = String(SPIFFS.totalBytes());
-        Data["useddisk"] = String(SPIFFS.usedBytes());
-        Data["freedisk"] = String(SPIFFS.totalBytes() - SPIFFS.usedBytes());
-        sprintf(_wsTxBuffer, "%s", BBVersion.c_str());
-        Data["version"] = _wsTxBuffer;
-        Data["ipaddress"] = WiFi.localIP().toString();
-        Data["sigstrength"] = WiFi.RSSI();
-        Data["apname"] = WiFi.SSID();
-
-        Data["temp"] = M5.Power.Axp192.getInternalTemperature();
-        Data["ubat"] = M5.Power.Axp192.getBatteryVoltage();
-        Data["ibat"] =  M5.Power.Axp192.getBatteryDischargeCurrent();
-        Data["pwrbat"] = M5.Power.Axp192.getBatteryPower();
-        Data["ubus"] = M5.Power.Axp192.getVBUSVoltage();
-        Data["ibus"] = M5.Power.Axp192.getVBUSCurrent();
-        Data["uin"] = M5.Power.Axp192.getACINVolatge();
-        Data["iin"] = M5.Power.Axp192.getACINCurrent();
-
-        serializeJson(doc,_wsTxBuffer);
-        Serial.println(_wsTxBuffer);
-        _events.send(_wsTxBuffer,
-          "STATS",
-          millis());
-    }
-  }
-}  
-
+}
 
 void WebPageTrackMeasuring::onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type,
-             void *arg, uint8_t *data, size_t len)
-{
-    char msg[50];
-
+                                    void *arg, uint8_t *data, size_t len)
+{ 
     switch (type)
     {
-    case WS_EVT_CONNECT:
-        snprintf(msg,
-          50,
-          "WebSocket client #%u connected from %s\n",
-          client->id(),
-          client->remoteIP().toString().c_str());
-        Serial.printf(msg);
-        WifiDebug::print(msg);
+    case WS_EVT_CONNECT:           
+        WifiDebug::print("WebSocket client #");
+        WifiDebug::print(client->id());
+        WifiDebug::print(" connected from ");
+        WifiDebug::println(client->remoteIP().toString().c_str());        
         break;
-    case WS_EVT_DISCONNECT:
-        snprintf(msg,
-          50,
-          "WebSocket client #%u disconnected\n",
-          client->id());
-        Serial.printf(msg);
-        WifiDebug::print(msg);
+    case WS_EVT_DISCONNECT:       
+        WifiDebug::print("WebSocket client # ");
+        WifiDebug::print(client->id());
+        WifiDebug::println(" disconnected");        
         break;
     case WS_EVT_DATA:
         handleWebSocketMessage(arg, data, len);
@@ -294,114 +284,118 @@ void WebPageTrackMeasuring::onEvent(AsyncWebSocket *server, AsyncWebSocketClient
     }
 }
 
-void WebPageTrackMeasuring::begin(AsyncWebServer* server)
+void WebPageTrackMeasuring::begin(AsyncWebServer *server)
 {
-  _ws.onEvent(onEvent);
-  server->addHandler(&_ws);
+    _ws.onEvent(onEvent);
+    server->addHandler(&_ws);
 
-  // Handle Web Server Events
-  _events.onConnect([](AsyncEventSourceClient *client)
-  {
-    if(client->lastId())
+    // Handle Web Server Events
+    _events.onConnect([](AsyncEventSourceClient *client)
     {
-        char msg[64];
+        if(client->lastId())
+        {
+            WifiDebug::print("Client reconnected! Last message ID that it got is: ");
+            WifiDebug::println(client->lastId());        
+        }
 
-        snprintf(msg,
-          64,
-         "Client reconnected! Last message ID that it got is: %u\n",
-          client->lastId());
-        Serial.printf(msg);
-        WifiDebug::print(msg);
-    }
+        // send event with message "hello!", id current millis
+        // and set reconnect delay to 1 second   
+        client->send("hello!", "", millis(), 1000);
+    });
 
-    // send event with message "hello!", id current millis
-    // and set reconnect delay to 1 second   
-    client->send("hello!", "", millis(), 1000);
-  });
+    server->addHandler(&_events);
 
- 
-  server->addHandler(&_events);
+    // Route for root / web page
+    server->on("/", HTTP_GET, [](AsyncWebServerRequest *request)
+    {
+         request->send_P(200,
+            "text/html",
+                                 _html,
+                                 processor); });
 
-  // Route for root / web page
-  server->on("/", HTTP_GET, [](AsyncWebServerRequest *request){
-    request->send_P(200,
-     "text/html",
-      _html,
-       processor);
-  });
-
-  server->on("/readings", HTTP_GET, [](AsyncWebServerRequest *request){
+    server->on("/readings", HTTP_GET, [](AsyncWebServerRequest *request)
+               {
     String json = getSensorReadingsJSON();
     request->send(200, "application/json", json);
-    json = String();
-  });
+    json = String(); });
 }
 
-String  WebPageTrackMeasuring::processor(const String& var){
-  getSensorReadings();
-  //Serial.println(var);
-  if(var == "TEMPERATURE"){
-    return String(_temperature);
-  }
-  else if(var == "HUMIDITY"){
-    return String(_humidity);
-  }
-  else if(var == "PRESSURE"){
-    return String(_pressure);
-  }
-  return String();
+String WebPageTrackMeasuring::processor(const String& var)
+{
+    getSensorReadings();
+    
+    if (var == "TEMPERATURE")
+    {
+        return String(_temperature);
+    }
+    else if (var == "HUMIDITY")
+    {
+        return String(_humidity);
+    }
+    else if (var == "PRESSURE")
+    {
+        return String(_pressure);
+    }
+    return String();
 }
 
 void WebPageTrackMeasuring::loop()
 {
     if (millis() < _lastMillis)
-      _millisRollOver++; //update ms rollover counter
+        _millisRollOver++; // update ms rollover counter
     else
-      _lastMillis = millis();  
+        _lastMillis = millis();
+
+    _ws.cleanupClients();
+    if (_ws.count() == 0)
+    {
+        return;
+    }
 
     if ((millis() - _lastTime) > _timerDelay)
     {
         getSensorReadings();
         char msg[50];
         snprintf(msg,
-          50,
-          "Temperature = %.2f ºC \n",
-          _temperature);
+                 50,
+                 "Temperature = %.2f ºC \n",
+                 _temperature);
         WifiDebug::print(msg);
-        
+
         snprintf(msg,
-          50,
-          "Humidity = %.2f \n",
-          _humidity);
+                 50,
+                 "Humidity = %.2f \n",
+                 _humidity);
         WifiDebug::print(msg);
-        
+
         snprintf(msg,
-          50,
-          "Pressure = %.2f hPa \n",
-          _pressure);
+                 50,
+                 "Pressure = %.2f hPa \n",
+                 _pressure);
         WifiDebug::print(msg);
         WifiDebug::println("-----");
 
         // Send Events to the Web Client with the Sensor Readings
-        
-        _events.send("ping","",millis());
-        _events.send(String(_temperature).c_str(),"temperature",millis());
-        _events.send(String(_humidity).c_str(),"humidity",millis());
-        _events.send(String(_pressure).c_str(),"pressure",millis());
+
+        _events.send("ping", "", millis());
+        _events.send(String(_temperature).c_str(), "temperature", millis());
+        _events.send(String(_humidity).c_str(), "humidity", millis());
+        _events.send(String(_pressure).c_str(), "pressure", millis());
 
         // send JSON object
-        _events.send(getSensorReadingsJSON().c_str(),"new_readings", millis());
+        _events.send(getSensorReadingsJSON().c_str(), "new_readings", millis());
 
         // Get speed data
-        String latestSpeedData = PurpleHatModule::GetSensorData();
-        if(latestSpeedData.isEmpty() == false)
+        String latestSpeedData;
+        latestSpeedData.reserve(512);
+        PurpleHatModule::GetSensorData(latestSpeedData);
+        if (latestSpeedData.isEmpty() == false)
         {
-          WifiDebug::println(latestSpeedData.c_str());         
-          _events.send(latestSpeedData.c_str(),
-             "SpeedData",
-             millis());
-        }        
-
+            WifiDebug::println(latestSpeedData.c_str());
+            _events.send(latestSpeedData.c_str(),
+                         "SpeedData",
+                         millis());
+        }
 
         _lastTime = millis();
     }
@@ -409,22 +403,22 @@ void WebPageTrackMeasuring::loop()
 
 void WebPageTrackMeasuring::getSensorReadings()
 {
-    _temperature += 1.0; 
+    _temperature += 1.0;
     _humidity += 2;
     _pressure += 3;
 }
 
 String WebPageTrackMeasuring::getSensorReadingsJSON()
-{  
-  DynamicJsonDocument readings(1024);
+{
+    DynamicJsonDocument readings(1024);
 
-  readings["sensor1"] = String(_temperature);
-  readings["sensor2"] = String(_humidity);
-  readings["sensor3"] = String(_pressure);
-  readings["sensor4"] = String(0);
+    readings["sensor1"] = String(_temperature);
+    readings["sensor2"] = String(_humidity);
+    readings["sensor3"] = String(_pressure);
+    readings["sensor4"] = String(0);
 
-  String jsonString;
-  serializeJson(readings, jsonString);
-  WifiDebug::println(jsonString);
-  return jsonString;
+    String jsonString;
+    serializeJson(readings, jsonString);
+//    WifiDebug::println(jsonString);
+    return jsonString;
 }

@@ -16,8 +16,8 @@ void PurpleHatModule::setup()
     Wire.setClock(400000);
     delay(10);
 //        Serial.println(Wire.getClock());
-
-    DynamicJsonDocument* jsonDataObj = ConfigLoader::getDocPtr("/configdata/phcfg.cfg", false);
+    
+    DynamicJsonDocument* jsonDataObj = ConfigLoader::getDocPtr(String("/configdata/phcfg.cfg"));
     if (jsonDataObj != NULL)
     {
          Serial.println("Load Trainside Sensor");
@@ -59,14 +59,14 @@ void PurpleHatModule::RepRate(int repRate)
         _trainSensor->setRepRate(NULL, repRate);
 }
 
-String PurpleHatModule::GetSensorData()
+void PurpleHatModule::GetSensorData(String& sensorData)
 {
     if (_trainSensor != NULL)
     {
-        return _trainSensor->processLoop();
+        _trainSensor->processLoop(sensorData);
     }
     else
     {
-        return {};
-    }
+        sensorData.clear();
+    }    
 }

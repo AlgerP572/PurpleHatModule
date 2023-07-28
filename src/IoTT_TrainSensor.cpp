@@ -771,16 +771,10 @@ void IoTT_TrainSensor::sendSpeedTableDataToWeb(bool isFinal)
 // 	}	
 }	
 
-String IoTT_TrainSensor::sendSensorDataToWeb()
-{
-//	sensorData cpyData = getSensorData();
-//	for (uint8_t i = 0; i < 50; i++)
-//		Serial.println(cpyData.avgMove[i]);
-//	Serial.println("Here");
-
-	
+void IoTT_TrainSensor::sendSensorDataToWeb(String& data)
+{	
 	sensorData cpyData = getSensorData();
-	DynamicJsonDocument doc(400);	
+	DynamicJsonDocument doc(512);	
 
 	doc["Cmd"] = "SensorData";
 	JsonObject Data = doc.createNestedObject("Data");
@@ -820,27 +814,25 @@ String IoTT_TrainSensor::sendSensorDataToWeb()
 	// 		}
 	// 	}
 	// }
-	String myMqttMsg;	
-	serializeJson(doc, myMqttMsg);
+
+	serializeJson(doc, data);
 //	Serial.println(myMqttMsg);
 	// while (currClient >= 0)
 	// {
 	// 	globalClients[currClient].wsClient->text(myMqttMsg);
 	// 	currClient = getWSClientByPage(currClient + 1, "pgPrplHatCfg");
 	// }
-	lastWebRefresh += refreshRate;
-	return myMqttMsg;	
+	lastWebRefresh += refreshRate;	
 }
 
-String IoTT_TrainSensor::processLoop()
+void IoTT_TrainSensor::processLoop(String& sensorData)
 {
-	String result = {};
 	delay(2);
 	if (refreshRate > 0)
 	{
 		if ((millis() - refreshRate) > lastWebRefresh)
 		{
-			result = sendSensorDataToWeb();
+			sendSensorDataToWeb(sensorData);
 		}
 	}
 	else
@@ -876,5 +868,4 @@ String IoTT_TrainSensor::processLoop()
 			}
 			speedSample.adminData.speedTestTimer += speedTestInterval;
 		}
-	return result;
 }

@@ -23,7 +23,7 @@ public:
     static void ResetDistance();
     static void ClearHeading();
     static void RepRate(int repRate);
-    static String GetSensorData();
+    static void GetSensorData(String& sensorData);
 };
 
 #endif

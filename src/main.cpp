@@ -17,51 +17,57 @@ unsigned long _timerDelay = 10000;
 
 void setup()
 {
-  M5.begin(); 
-  M5.Lcd.setTextSize(3);
-  M5.Lcd.setRotation(3);  
-  M5.Lcd.println("Purple Hat");
+    M5.begin(); 
+    M5.Lcd.setTextSize(3);
+    M5.Lcd.setRotation(3);  
+    M5.Lcd.println("Purple Hat");
 
-  WiFi.mode(WIFI_STA); 
-  Serial.begin(115200);
+    WiFi.mode(WIFI_STA); 
+    Serial.begin(115200);
 
-  AsyncWebServer* server = WebServer::get();
-  DNSServer* dns = WebServer::dns();
+    AsyncWebServer* server = WebServer::get();
+    DNSServer* dns = WebServer::dns();
 
-  bool result = WifiConnection::setup(server, dns, false);
+    bool result = WifiConnection::setup(server, dns, false);
 
-  if(result == false) 
-  {
+    if(result == false) 
+    {
      
-    Serial.println("Failed to connect");
-    M5.Lcd.println("Failed to connect");
-    ESP.restart();
-  }
+        Serial.println("Failed to connect");
+        M5.Lcd.println("Failed to connect");
+        ESP.restart();
+    }
   
-  // If you get here you have connected to the WiFi    
-  Serial.println("connected...");
-  M5.Lcd.println("Engine: ");    
-  M5.Lcd.println(WiFi.localIP());
+    // If you get here you have connected to the WiFi    
+    Serial.println("connected...");
+    M5.Lcd.println("Engine: ");    
+    M5.Lcd.println(WiFi.localIP());
 
-  if(!SPIFFS.begin(true))
-  {
-    Serial.println("An Error has occurred while mounting SPIFFS");
-    return;
-  }
-  server->serveStatic("/", SPIFFS, "/");
+    if(!SPIFFS.begin(true))
+    {
+        Serial.println("An Error has occurred while mounting SPIFFS");
+        return;
+    }
+    server->serveStatic("/", SPIFFS, "/");
 
-  // Start underlying hardware modules
-  PurpleHatModule::setup(); 
+
+    // Note: Before this point OTA logging does not work.
+    // The next line starts the servcies required for OTA
+    // logging.
+    WifiDebug::begin(server);
   
-  // Start supported services
-  WebPageTrackMeasuring::begin(server);
-  WebPageCv::begin(server);
-  WebPagePurpleHat::begin(server);
-  WifiFirmware::begin(server);
-  WifiDebug::begin(server);
+    // Start supported services
+    WebPageTrackMeasuring::begin(server);
+    WebPageCv::begin(server);
+    WebPagePurpleHat::begin(server);
+    WifiFirmware::begin(server);
+    WebServer::begin();
   
-  WebServer::begin();    
-  M5.Lcd.println("HTTP server started");    
+
+    // Start underlying hardware modules
+    PurpleHatModule::setup(); 
+         
+    M5.Lcd.println("HTTP server started");    
 }
 
 void loop()

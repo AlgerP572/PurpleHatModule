@@ -150,7 +150,7 @@ public:
 	IoTT_TrainSensor(TwoWire * newWire, uint8_t sda, uint8_t scl);
 	~IoTT_TrainSensor();
 	void begin();
-	String processLoop();
+	void processLoop(String& sensorData);
 	sensorData getSensorData();
 	void resetDistance();
 	void resetHeading();
@@ -169,7 +169,7 @@ public:
 private:
 	void sendSpeedTableDataToWeb(bool isFinal);
 //	void sendPosDataToWeb();
-	String sendSensorDataToWeb();
+	void  sendSensorDataToWeb(String& sensorData);
 	void clrSpeedTable();
 	bool processTestStep(sensorData * sensStatus);
 	bool processSpeedTest(); //returns false if complete

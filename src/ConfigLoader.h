@@ -3,17 +3,11 @@
 
 #include <ArduinoJson.h>
 
-#define BufferSize 16384
-
 class ConfigLoader
 { 
-private:    
-    static char _wsTxBuffer[BufferSize];
-   
-
 public:    
-    static DynamicJsonDocument* getDocPtr(String cmdFile, bool duplData);
-     static uint32_t readFileToBuffer(String fileName, char * thisBuffer, uint32_t maxSize); 
+    static DynamicJsonDocument* getDocPtr(const String& cmdFile);
+    static bool readFile(const String& fileName,  String& buffer);
 };
 
 #endif
