@@ -3,62 +3,53 @@
 #include "ConfigLoader.h"
 #include "WifiDebug.h"
 
-char ConfigLoader::_wsTxBuffer[BufferSize];
-
-uint32_t ConfigLoader::readFileToBuffer(String fileName, char* thisBuffer, uint32_t maxSize)
+bool ConfigLoader::readFile(const String& fileName,  String& buffer)
 {
-    uint32_t bytesRead = 0;
-    //  Serial.printf("Trying to read File %s\n", &fileName[0]);
-    if (SPIFFS.exists(fileName))
+    if (!SPIFFS.exists(fileName))
+    {       
+        WifiDebug::print("File" + fileName + "not found\n");
+        return false;
+    }
+
+    File dataFile = SPIFFS.open(fileName, "r");
+    if (!dataFile)
+    {        
+        WifiDebug::print("Can't open" + fileName +" \n");
+        return false;
+    }
+
+    buffer.reserve(dataFile.size() + 1);
+    while (dataFile.available())
     {
-        File dataFile = SPIFFS.open(fileName, "r");
-        if (dataFile)
-        {
-        if (dataFile.size() < maxSize)
-        {
-            bytesRead = dataFile.size();
-            dataFile.read((uint8_t*)thisBuffer, bytesRead);
-            thisBuffer[bytesRead] = '\0'; 
-        }
-        dataFile.close();
-        }
-        else 
-        Serial.printf("Can't open %s \n", &fileName[0]);
-    } 
-    else 
-        Serial.printf("File %s not found\n", &fileName[0]);
-    return bytesRead;
+        buffer += dataFile.readString();
+    }
+
+    dataFile.close();
+    return true;
 }
 
-DynamicJsonDocument* ConfigLoader::getDocPtr(String cmdFile, bool duplData)
+DynamicJsonDocument* ConfigLoader::getDocPtr(const String& cmdFile)
 {
-    uint32_t jsonData = readFileToBuffer(cmdFile,
-        _wsTxBuffer,
-        BufferSize);
-    Serial.println(_wsTxBuffer);
-    if (jsonData > 0)
+    String jsonData;
+    
+    readFile(cmdFile, jsonData);    
+    if (jsonData.length() <= 0)
     {
-        uint16_t docSize = 4096 * (trunc((3 * jsonData) / 4096) + 1);  //.length();
-        Serial.printf("Size: %i Doc Size: %i\n", jsonData, docSize);
-        DynamicJsonDocument * thisDoc = new DynamicJsonDocument(docSize);
-        DeserializationError error;
-        if (duplData)
-            error = deserializeJson(*thisDoc, (const char*) _wsTxBuffer); //use const to force deserialize to keep copy of buffer data
-        else
-            error = deserializeJson(*thisDoc, _wsTxBuffer); //use const to force deserialize to keep copy of buffer data
-        if (!error)
-        {
-            return thisDoc;
-        }
-        else
-        {
-            Serial.println("Deserialization error");
-            return NULL;
-        }
+        WifiDebug::println("File read error");
+        return NULL;
     }
-    else
+
+    uint16_t docSize = 4096 * (trunc((3 * jsonData.length()) / 4096) + 1);
+    WifiDebug::print("Size:" + jsonData +  "Doc Size:" + docSize + "\n");
+    DynamicJsonDocument * thisDoc = new DynamicJsonDocument(docSize);
+    DeserializationError error;
+    error = deserializeJson(*thisDoc, jsonData); 
+        
+    if (error)
     {
-        Serial.println("File read error");
-         return NULL;
-    }
+        WifiDebug::println("Deserialization error");
+        return NULL;
+    } 
+
+    return thisDoc; 
 }
