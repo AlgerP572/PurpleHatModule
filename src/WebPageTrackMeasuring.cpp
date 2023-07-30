@@ -280,33 +280,11 @@ void WebPageTrackMeasuring::begin(AsyncWebServer *server)
             "text/html",
             _html,
             processor);
-    });
-
-    server->on("/readings", HTTP_GET, [](AsyncWebServerRequest *request)
-    {
-        String json;
-        json.reserve(512);
-        //getSensorReadingsJSON(json);
-        request->send(200, "application/json", json);
-    });
+    });   
 }
 
 String WebPageTrackMeasuring::processor(const String& var)
 {
-    //getSensorReadings();
-    
-    // if (var == "TEMPERATURE")
-    // {
-    //     return String(_temperature);
-    // }
-    // else if (var == "HUMIDITY")
-    // {
-    //     return String(_humidity);
-    // }
-    // else if (var == "PRESSURE")
-    // {
-    //     return String(_pressure);
-    // }
     return String();
 }
 

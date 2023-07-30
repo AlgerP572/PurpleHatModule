@@ -21,35 +21,13 @@ function onClose(event) {
 window.addEventListener('load', onLoad);
 
 var chart;
-
-//Plot temperature in the temperature chart
-function plotTemperature(jsonValue) {
-
-  var keys = Object.keys(jsonValue);
-//  console.log(keys);
-//  console.log(keys.length);
-
-  for (var i = 0; i < keys.length; i++){
-    var x = (new Date()).getTime();
-//    console.log(x);
-    const key = keys[i];
-    var y = Number(jsonValue[key]);
-//    console.log(y);
-
-    if(chartT.series[i].data.length > 400) {
-      chartT.series[i].addPoint([x, y], true, true, true);
-    } else {
-      chartT.series[i].addPoint([x, y], true, false, true);
-    }
-
-  }
-}
+var currentX = 0;
 
 function plotSpeed(jsonValue) {
 
   var data = jsonValue.Data;
   console.log(data);
-  var x = (new Date()).getTime();
+  var x = ++currentX; // (new Date()).getTime();
   var y = Number(data.Speed);
 
   document.getElementById("angle").innerHTML = data.AxisAngle.toFixed(2);
@@ -77,6 +55,9 @@ function  UpdateUI()
   document.getElementById("scale").innerHTML = configData.ScaleList[configData.ScaleIndex].Name;
   document.getElementById("scaleunit").innerHTML = "1:" + configData.ScaleList[configData.ScaleIndex].Scale;
   document.getElementById("reversedirection").innerHTML = configData.ReverseDir;
+
+  chart.options.scales['y1'].title.text = 'Scale (' + configData.ScaleList[configData.ScaleIndex].Name + "  1:" + configData.ScaleList[configData.ScaleIndex].Scale + ') Speed [km/h]';
+  chart.update();
 }
 
 function  UpdateFooter()
@@ -114,13 +95,6 @@ if (!!window.EventSource) {
     //console.log("Track Measuring message", e.data);
   }, false);
 
-//   source.addEventListener('new_readings', function(e) {
-//     //console.log("Track Measuring new_readings", e.data);
-//     var myObj = JSON.parse(e.data);
-// //    console.log(myObj);
-//     plotTemperature(myObj);
-//   }, false);
-
   source.addEventListener('SpeedData', function(e) {
     //console.log("Track Measuring new_readings", e.data);
     var myObj = JSON.parse(e.data);
@@ -143,28 +117,14 @@ if (!!window.EventSource) {
     statsData = myObj["Data"];
     UpdateFooter();
   }, false);
-  
-   
-//  source.addEventListener('temperature', function(e) {
-//     console.log("temperature", e.data);
-//     document.getElementById("temp").innerHTML = e.data;
-//    }, false);
-   
-   source.addEventListener('humidity', function(e) {
-//    console.log("humidity", e.data);
-//    document.getElementById("scalespeed").innerHTML = e.data;
-   }, false);
-   
-//    source.addEventListener('pressure', function(e) {
-// //    console.log("pressure", e.data);
-//     document.getElementById("pres").innerHTML = e.data;
-//    }, false);
 }
 
 function onLoad(event) {
   initWebSocket();
-  initChart();
   getConfig();
+
+  // This requires the prvious two.
+  initChart();  
 }
 
 function initChart(){
@@ -193,15 +153,29 @@ function initChart(){
       borderWidth: 3,
       borderColor: ["rgba(255, 99, 132, 128)"],
       scales: {
+        x: {
+            title: {
+                display: true,
+                text: 'Samples [count]'
+                }
+        }, 
         y: {
-          type: 'linear',
-          display: true,
-          position: 'left',
+            title: {
+                display: true,
+                text: 'Measured Speed [mm/s]'
+            },
+            type: 'linear',
+            display: true,
+            position: 'left',
         },
         y1: {
-          type: 'linear',
-          display: true,
-          position: 'right',
+            title: {
+                display: true,
+                text: 'Scale Speed [km/h]'
+            },
+            type: 'linear',
+            display: true,
+            position: 'right',
   
           // grid line settings
           grid: {
