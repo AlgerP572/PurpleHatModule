@@ -1,7 +1,7 @@
 #include <Wire.h>
 
 #include "PurpleHatModule.h"
-#include "WifiDebug.h"
+#include "WifiSerialDebug.h"
 #include "ConfigLoader.h"
 
 IoTT_TrainSensor* PurpleHatModule::_trainSensor = NULL;

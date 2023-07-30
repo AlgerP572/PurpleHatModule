@@ -7,8 +7,9 @@
 #include "WebPageCV.h"
 #include "WebPagePurpleHat.h"
 #include "WifiConnection.h"
-#include "WifiDebug.h"
+#include "WifiSerialDebug.h"
 #include "WifiFirmware.h"
+#include "NTPTimeClient.h"
 
 #include "PurpleHatModule.h"
 
@@ -42,6 +43,16 @@ void setup()
     Serial.println("connected...");
     M5.Lcd.println("Engine: ");    
     M5.Lcd.println(WiFi.localIP());
+    WiFi.config(WiFi.localIP(), WiFi.gatewayIP(), WiFi.subnetMask(), IPAddress(8,8,8,8)); 
+
+    // Initialize a NTPClient to get time
+    TimeClient::begin();
+    // Set offset time in seconds to adjust for your timezone, for example:
+    // GMT +1 = 3600
+    // GMT +8 = 28800
+    // GMT -1 = -3600
+    // GMT 0 = 0
+    TimeClient::setTimeOffset(3600);
 
     if(!SPIFFS.begin(true))
     {
@@ -53,8 +64,9 @@ void setup()
 
     // Note: Before this point OTA logging does not work.
     // The next line starts the servcies required for OTA
-    // logging.
-    WifiDebug::begin(server);
+    // logging. Anything using OTA logging including web
+    // pages must be after this line.
+    Log::begin(server);
   
     // Start supported services
     WebPageTrackMeasuring::begin(server);
@@ -72,21 +84,33 @@ void setup()
 
 void loop()
 { 
-  u32_t time = millis();
+    u32_t time = millis();
 
-  if ((time - _lastTime) > _timerDelay)
-  {
-    WifiDebug::print("Time: ");
-    WifiDebug::println(time);
-    _lastTime = time; 
-  }
+    if(!TimeClient::update())
+    {
+        TimeClient::forceUpdate();
+    }
+    
+    if ((time - _lastTime) > _timerDelay)
+    {
+        Log::print("Time: ", LogLevel::WATCHDOG);
+        Log::println(time, LogLevel::WATCHDOG);
+        _lastTime = time;
+        
+        // The formattedDate comes with the following format:
+        // 2018-05-28T16:00:13Z
+        // We need to extract date and time
+        String formattedTime;
+        TimeClient::getFormattedDate(formattedTime);
+        Log::println(formattedTime, LogLevel::WATCHDOG);
+    }
 
-  delay(2);
-  WebPageTrackMeasuring::loop();
-  delay(2);
-  WebPagePurpleHat::loop();  
+    delay(2);
+    WebPageTrackMeasuring::loop();
+    delay(2);
+    WebPagePurpleHat::loop();  
 
-  // This will "feed the watchdog".
-  delay(2);
-  return;  
+    // This will "feed the watchdog".
+    delay(2);
+    return;  
 }

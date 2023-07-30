@@ -97,20 +97,6 @@ function  UpdateFooter()
   document.getElementById("batcurrent").innerHTML = statsData.ibat.toFixed(2) + " mA";  
 }
 
-// Function to get current readings on the webpage when it loads for the first time
-function getReadings(){
-  var xhr = new XMLHttpRequest();
-  xhr.onreadystatechange = function() {
-    if (this.readyState == 4 && this.status == 200) {
-      var myObj = JSON.parse(this.responseText);
-      console.log(myObj);
-      plotTemperature(myObj);
-    }
-  };
-  xhr.open("GET", "/readings", true);
-  xhr.send();
-}
-
 if (!!window.EventSource) {
   var source = new EventSource('/eventstrackmeasuring');
 

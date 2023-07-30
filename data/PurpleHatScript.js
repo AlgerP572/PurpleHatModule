@@ -1,5 +1,4 @@
 // Get current sensor readings when the page loads
-window.addEventListener('load', getReadings);
 window.addEventListener('load', onLoad);
 var chart;
 

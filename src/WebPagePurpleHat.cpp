@@ -1,5 +1,5 @@
 #include "WebPagePurpleHat.h"
-#include "WifiDebug.h"
+#include "WifiSerialDebug.h"
 
 char WebPagePurpleHat::_html[] PROGMEM = R"rawliteral(
 <!DOCTYPE HTML><html>
@@ -80,7 +80,7 @@ void WebPagePurpleHat::onEvent(AsyncWebSocket *server, AsyncWebSocketClient *cli
           client->id(),
           client->remoteIP().toString().c_str());
         Serial.printf(msg);
-        WifiDebug::print(msg);
+        Log::print(msg, LogLevel::INFO);
         break;
     case WS_EVT_DISCONNECT:
         snprintf(msg,
@@ -88,7 +88,7 @@ void WebPagePurpleHat::onEvent(AsyncWebSocket *server, AsyncWebSocketClient *cli
           "WebSocket client #%u disconnected\n",
           client->id());
         Serial.printf(msg);
-        WifiDebug::print(msg);
+        Log::print(msg, LogLevel::INFO);
         break;
     case WS_EVT_DATA:
         handleWebSocketMessage(arg, data, len);
@@ -116,7 +116,7 @@ void WebPagePurpleHat::begin(AsyncWebServer* server)
          "Client reconnected! Last message ID that it got is: %u\n",
           client->lastId());
         Serial.printf(msg);
-        WifiDebug::print(msg);
+        Log::print(msg, LogLevel::INFO);
     }
 
     // send event with message "hello!", id current millis
@@ -167,20 +167,20 @@ void WebPagePurpleHat::loop()
          50,
           "Temperature = %.2f ºC \n",
           _temperature);
-        WifiDebug::print(msg);
+        Log::print(msg, LogLevel::LOOP);
         
         snprintf(msg,
          50,
          "Humidity = %.2f \n",
          _humidity);
-        WifiDebug::print(msg);
+        Log::print(msg, LogLevel::LOOP);
         
         snprintf(msg,
           50,
           "Pressure = %.2f hPa \n",
           _pressure);
-        WifiDebug::print(msg);
-        WifiDebug::println("-----");
+        Log::print(msg, LogLevel::LOOP);
+        Log::println("-----", LogLevel::LOOP);
 
         // Send Events to the Web Client with the Sensor Readings
         _events.send("ping",NULL,millis());
@@ -211,7 +211,6 @@ String WebPagePurpleHat::getSensorReadingsJSON()
   readings["sensor4"] = String(0);
 
   String jsonString;
-  serializeJson(readings, jsonString);
-  WifiDebug::println(jsonString);
+  serializeJson(readings, jsonString);  
   return jsonString;
 }

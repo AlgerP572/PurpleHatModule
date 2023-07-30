@@ -1,20 +1,20 @@
 #include <SPIFFS.h>
 
 #include "ConfigLoader.h"
-#include "WifiDebug.h"
+#include "WifiSerialDebug.h"
 
 bool ConfigLoader::readFile(const String& fileName,  String& buffer)
 {
     if (!SPIFFS.exists(fileName))
     {       
-        WifiDebug::print("File" + fileName + "not found\n");
+        Log::print("File" + fileName + "not found\n", LogLevel::ERROR);
         return false;
     }
 
     File dataFile = SPIFFS.open(fileName, "r");
     if (!dataFile)
     {        
-        WifiDebug::print("Can't open" + fileName +" \n");
+        Log::print("Can't open" + fileName +" \n", LogLevel::ERROR);
         return false;
     }
 
@@ -35,19 +35,19 @@ DynamicJsonDocument* ConfigLoader::getDocPtr(const String& cmdFile)
     readFile(cmdFile, jsonData);    
     if (jsonData.length() <= 0)
     {
-        WifiDebug::println("File read error");
+        Log::println("File read error", LogLevel::ERROR);
         return NULL;
     }
 
     uint16_t docSize = 4096 * (trunc((3 * jsonData.length()) / 4096) + 1);
-    WifiDebug::print("Size:" + jsonData +  "Doc Size:" + docSize + "\n");
+    Log::print("Size:" + jsonData +  "Doc Size:" + docSize + "\n", LogLevel::DEBUG);
     DynamicJsonDocument * thisDoc = new DynamicJsonDocument(docSize);
     DeserializationError error;
     error = deserializeJson(*thisDoc, jsonData); 
         
     if (error)
     {
-        WifiDebug::println("Deserialization error");
+        Log::println("Deserialization error.", LogLevel::ERROR);
         return NULL;
     } 
 
