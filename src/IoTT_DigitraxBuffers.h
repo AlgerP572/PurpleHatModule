@@ -87,8 +87,6 @@ typedef uint8_t powerStatusBuffer;
 typedef uint8_t slotData[10]; //slot data 0 is slot number, this is given by position in array, so we only need 10 bytes
 typedef slotData slotDataBuffer[numSlots];
 
-extern DynamicJsonDocument * getDocPtr(String cmdFile, bool duplData);
-
 typedef struct
 {
 	uint32_t lastActivity;

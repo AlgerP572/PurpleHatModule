@@ -15,6 +15,7 @@ html {
   .topnav {
     overflow: hidden;
     background-color: #0A1128;
+    padding: 10px 24px;    
   }
   body {
     margin: 0;
@@ -77,3 +78,41 @@ html {
     padding: 2px;
     color: #FFFFFF;
   }
+
+  .tool-bar {
+    display: flex;
+    align-items: center;
+  }
+
+  .tool-bar button {
+    background-color: #804080;
+    border: 1px solid #D4C0D4;
+    color: white;
+    padding: 10px 24px;
+    cursor: pointer;
+    float: left;
+    margin: auto;        
+  }  
+
+  .tool-bar h1 {    
+    float: left;
+    padding: 10px;
+    margin: auto;
+    text-align: left;
+  }
+  
+.tool-bar button:not(:last-child) {
+    border-right: none; /* Prevent double borders */
+}
+
+  /* Clear floats (clearfix hack) */
+.tool-bar:after {
+    content: "";
+    clear: both;
+    display: table;
+}
+  
+/* Add a background color on hover */
+.tool-bar button:hover {
+    background-color: #D4E4D4;
+}

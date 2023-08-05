@@ -1,11 +1,11 @@
 #include "NTPTimeClient.h"
-#include "WebPageTrackMeasuring.h"
+#include "WebPageSpeedMagic.h"
 #include "WifiSerialDebug.h"
 
 #include "PurpleHatModule.h"
 #include "ConfigLoader.h"
 
-char WebPageTrackMeasuring::_html[] PROGMEM = R"rawliteral(
+char WebPageSpeedMagic::_html[] PROGMEM = R"rawliteral(
 <!DOCTYPE HTML><html>
 <head>
   <title>Purple Hat Sensor</title>
@@ -24,7 +24,7 @@ char WebPageTrackMeasuring::_html[] PROGMEM = R"rawliteral(
   </style>
 </head>
 <body>
-  <div class="topnav">
+   <div class="topnav">
     <div class="tool-bar">        
         <a href="/">
             <button class="btn-group">Track Data</button>
@@ -38,71 +38,74 @@ char WebPageTrackMeasuring::_html[] PROGMEM = R"rawliteral(
         <a href="/webserial">
             <button>Log</button>
         </a>
-        <h1>Track Measuring Display</h1>
+        <h1>Speed Magic</h1>
     </div>
   </div>
   <div class="content">
     <div class="card-grid">
       <div class="card">
         <div class="button-container">
-          <button id="btnStart" class="button" onClick="startMeasuring(this)">Start</button>
-          <button id="btnStart" class="button" onClick=" resetDistance(this)">Reset Distance</button>
+            <input type="file" id="load-btn" style="display:none" onChange="loadJMRIFile(this)"/>
+            <button id="load-button" class="button" onClick="loadJMRIDlg(this)">Load JMRI file</button>
+            <button class="button" onClick=" resetDistance(this)">Save JMRI file</button>
         </div>                   
         <p><table class="datatable">
         <tr>
-          <th>Data</th>
-          <th>Value</th>
-          <th>Units</th>          
+            <th colspan="3">Data</th>
+            <th colspan="3">Value</th>        
         </tr>
          <tr>
-          <td>Scale</td>
-          <td><span id="scale">%Scale%</span></td>
-          <td><span id="scaleunit">%Scaleunit%</span></td>        
+          <td colspan="3">File Name</td>
+          <td colspan="3"><span id="jmrifilename">%fileName%</span></td>                  
         </tr>
         <tr>
-          <td>Wheel Diameter</td>
-          <td><span id="wheeldiameter">%Wheel Diameter%</span></td>
-          <td>[mm]</td>          
+          <td colspan="3">Locomotive</td>
+          <td colspan="3"><span id="dccloco">%locomotive%</span></td>                   
         </tr>
          <tr>
-          <td>Angle</td>
-          <td><span id="angle">%angle%</span></td>
-          <td>[&deg]</td>          
+          <td colspan="3">DCC Address</td>
+          <td colspan="3"><span id="jmriaddr">%dccaddress%</span></td>
         </tr>
          <tr>
-          <td>Reverse Direction</td>
-          <td><span id="reversedirection">%reversedirection%</span></td>
-          <td></td>          
+          <td colspan="3">Decoder Brand</td>
+          <td colspan="3"><span id="decbrand">%brand%</span></td>
         </tr>
         <tr>
-          <td>Direction</td>
-          <td><span id="direction">%Direction%</span></td>
-          <td></td>          
+          <td colspan="3">Decoder Family</td>
+          <td colspan="3"><span id="decfamily">%Direction%</span></td>
         </tr>
         <tr>
-          <td>Measured Speed</td>
-          <td><span id="measuredspeed">%Measured Soeed%</span></td>
-          <td>[mm/s]</td>          
+          <td colspan="3">Decoder Model</td>
+          <td colspan="3"><span id="decmodel">%Measured Soeed%</span></td>
         </tr>        
         <tr>
-          <td>Scale Speed</td>
-          <td><span id="scalespeed">%scalespeed%</span></td>
-          <td>[km/h]</td>
+          <td><span id="cv02">CV 02</span></td>
+          <td><span id="cvn02">%cvvalue%</span></td>
+          <td><span id="cv03">CV 03</span></td>
+          <td><span id="cvn03">%cvvalue%</span></td>
+          <td><span id="cv04">CV 04</span></td>
+          <td><span id="cvn04">%cvvalue%</span></td>          
+        </tr>
+        <tr>          
+          <td><span id="cv05">CV 05</span></td>
+          <td><span id="cvn05">%cvvalue%</span></td>
+          <td><span id="cv06">CV 06</span></td>
+          <td><span id="cvn06">%cvvalue%</span></td>
+          <td><span id="cv29">CV 29</span></td>
+          <td><span id="cvn29">%cvvalue%</span></td> 
         </tr>
         <tr>
-          <td>Absolute Distance</td>
-          <td><span id="absdistance">%absdistance%</span></td>
-          <td>[cm]</td>  
-        </tr>
-        <tr>
-          <td>Relative Distance</td>
-          <td><span id="reldistance">%reldistance%</span></td>
-          <td>[cm]</td>  
+          <td>Scale</td>          
+          <td><span id="scaleunit">%Scaleunit%</span></td>
+          <td>Diameter [mm]</td>
+          <td><span id="wheeldiameter">%Wheel Diameter%</span></td>
+          <td>V Max [km/h]</td>
+          <td><span id="jmrivmax">%maxspeed%</span></td>
         </tr>
       </table></p>
       </div>      
       <div class="card">
-          <p class="card-title">Speed Data</p>
+          <p class="card-title">Speed Magic</p>
           <canvas id="chart-speed-data" width="600" height="400"></canvas>
         </div>
     </div>
@@ -143,19 +146,19 @@ char WebPageTrackMeasuring::_html[] PROGMEM = R"rawliteral(
       </tr>
     </table></p>
   </div>
-  <script src="TrackMeasuringDisplay.js"></script>  
+  <script src="SpeedMagicDisplay.js"></script>  
 </body>
 </html>)rawliteral";
 
-AsyncWebSocket WebPageTrackMeasuring::_ws("/wstrackmeasuring");
-AsyncEventSource WebPageTrackMeasuring::_events("/eventstrackmeasuring");
-unsigned long WebPageTrackMeasuring::_lastTime = 0;
-unsigned long WebPageTrackMeasuring::_timerDelay = 1000;
-int WebPageTrackMeasuring::_millisRollOver = 0;
-unsigned long WebPageTrackMeasuring::_lastMillis = 0;
-String WebPageTrackMeasuring::BBVersion = "1.6.0";
+AsyncWebSocket WebPageSpeedMagic::_ws("/wsspeedmagic");
+AsyncEventSource WebPageSpeedMagic::_events("/eventsspeedmagic");
+unsigned long WebPageSpeedMagic::_lastTime = 0;
+unsigned long WebPageSpeedMagic::_timerDelay = 1000;
+int WebPageSpeedMagic::_millisRollOver = 0;
+unsigned long WebPageSpeedMagic::_lastMillis = 0;
+String WebPageSpeedMagic::BBVersion = "1.6.0";
 
-void WebPageTrackMeasuring::handleWebSocketMessage(void *arg, uint8_t *data, size_t len)
+void WebPageSpeedMagic::handleWebSocketMessage(void *arg, uint8_t *data, size_t len)
 {
     AwsFrameInfo *info = (AwsFrameInfo *)arg;
     Log::println("WebSocket event", LogLevel::INFO);
@@ -188,20 +191,14 @@ void WebPageTrackMeasuring::handleWebSocketMessage(void *arg, uint8_t *data, siz
             String subCmd = doc["SubCmd"];
             Log::println(subCmd, LogLevel::INFO);
 
-            if (subCmd == "ClearDist")
+            if (subCmd == "SetDCC")
             {
-                PurpleHatModule::ResetDistance();
-            }
-            if (subCmd == "ClearHeading")
-            {
-                PurpleHatModule::ClearHeading();
-            }
-            if (subCmd == "RepRate")
-            {
+                int16_t dccAddr = doc["Addr"];
+                Log::print("DCC Addr: ", LogLevel::INFO);
+                Log::println(dccAddr, LogLevel::INFO);
 
-                uint16_t repRate = doc["Val"];
-                PurpleHatModule::RepRate(repRate);
-            }
+                PurpleHatModule::SetDccAddr(dccAddr);          
+            }            
         }
         if (thisCmd == "CfgData") // Config Request Format: {"Cmd":"CfgData", "Type":"pgxxxxCfg", "FileName":"name"}
         {
@@ -241,7 +238,7 @@ void WebPageTrackMeasuring::handleWebSocketMessage(void *arg, uint8_t *data, siz
     }
 }
 
-void WebPageTrackMeasuring::onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type,
+void WebPageSpeedMagic::onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type,
                                     void *arg, uint8_t *data, size_t len)
 { 
     switch (type)
@@ -266,7 +263,7 @@ void WebPageTrackMeasuring::onEvent(AsyncWebSocket *server, AsyncWebSocketClient
     }
 }
 
-void WebPageTrackMeasuring::begin(AsyncWebServer *server)
+void WebPageSpeedMagic::begin(AsyncWebServer *server)
 {
     _ws.onEvent(onEvent);
     server->addHandler(&_ws);
@@ -288,7 +285,7 @@ void WebPageTrackMeasuring::begin(AsyncWebServer *server)
     server->addHandler(&_events);
 
     // Route for root / web page
-    server->on("/", HTTP_GET, [](AsyncWebServerRequest *request)
+    server->on("/speedmagic", HTTP_GET, [](AsyncWebServerRequest *request)
     {
         request->send_P(200,
             "text/html",
@@ -297,12 +294,12 @@ void WebPageTrackMeasuring::begin(AsyncWebServer *server)
     });   
 }
 
-String WebPageTrackMeasuring::processor(const String& var)
+String WebPageSpeedMagic::processor(const String& var)
 {
     return String();
 }
 
-void WebPageTrackMeasuring::loop()
+void WebPageSpeedMagic::loop()
 {
     if (millis() < _lastMillis)
         _millisRollOver++; // update ms rollover counter
@@ -348,7 +345,7 @@ void WebPageTrackMeasuring::loop()
     }
 }
 
-void WebPageTrackMeasuring::GetStats(String& jsonData)
+void WebPageSpeedMagic::GetStats(String& jsonData)
 {
     DynamicJsonDocument doc(640);
 

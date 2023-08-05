@@ -156,7 +156,7 @@ public:
 	void resetHeading();
 	float_t getPercOfAngle(float_t gForce);
 	void setTxCallback(txFct newCB);
-	void loadLNCfgJSON(DynamicJsonDocument doc);
+	void loadLNCfgJSON(DynamicJsonDocument& doc);
 	volatile void sensorTask(void * thisParam);
 	void setRepRate(AsyncWebSocketClient * newClient, int newRate);
 	void reqDCCAddrWatch(AsyncWebSocketClient * newClient, int16_t dccAddr, bool simulOnly);

@@ -23,6 +23,7 @@ public:
     static void ResetDistance();
     static void ClearHeading();
     static void RepRate(int repRate);
+    static void SetDccAddr(int16_t dccAddr);
     static void GetSensorData(String& sensorData);
 };
 

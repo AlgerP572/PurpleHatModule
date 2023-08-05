@@ -59,6 +59,18 @@ void PurpleHatModule::RepRate(int repRate)
         _trainSensor->setRepRate(NULL, repRate);
 }
 
+void PurpleHatModule::SetDccAddr(int16_t dccAddr)
+{
+    if (_trainSensor != NULL)
+    {
+
+        // Curerntly only suppoting WiThrottle.
+        _trainSensor->reqDCCAddrWatch(NULL,
+            dccAddr,
+             true); //17: WiThrottle Client                
+    }
+}
+
 void PurpleHatModule::GetSensorData(String& sensorData)
 {
     if (_trainSensor != NULL)

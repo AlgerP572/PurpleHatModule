@@ -4,6 +4,7 @@
 
 #include "WebServer.h"
 #include "WebPageTrackMeasuring.h"
+#include "WebPageSpeedMagic.h"
 #include "WebPageCV.h"
 #include "WebPagePurpleHat.h"
 #include "WifiConnection.h"
@@ -11,10 +12,17 @@
 #include "WifiFirmware.h"
 #include "NTPTimeClient.h"
 
+#include "DigitraxBuffersModule.h"
 #include "PurpleHatModule.h"
+#include "WiThrottleModule.h"
 
 unsigned long _lastTime;  
 unsigned long _timerDelay = 10000;
+
+uint16_t sendMsg(lnTransmitMsg txData)
+{    
+    return  WiThrottleModule::sendMsg(txData);
+}
 
 void setup()
 {
@@ -43,7 +51,13 @@ void setup()
     Serial.println("connected...");
     M5.Lcd.println("Engine: ");    
     M5.Lcd.println(WiFi.localIP());
-    WiFi.config(WiFi.localIP(), WiFi.gatewayIP(), WiFi.subnetMask(), IPAddress(8,8,8,8)); 
+
+    // I have found using the goolge standard nameserver a little more robust.
+    // Than the default provided by my ISP.
+    WiFi.config(WiFi.localIP(),
+        WiFi.gatewayIP(),
+        WiFi.subnetMask(),
+        IPAddress(8,8,8,8)); 
 
     // Initialize a NTPClient to get time
     TimeClient::begin();
@@ -52,10 +66,15 @@ void setup()
     // GMT +8 = 28800
     // GMT -1 = -3600
     // GMT 0 = 0
-    TimeClient::setTimeOffset(3600);
+    TimeClient::setTimeOffset(-25200); // southern california.
 
+    // This needs to be before anything that will acess SPIFFS data
+    // like config files.
     if(!SPIFFS.begin(true))
     {
+        // Chicken and egg here.  Can't use LOG since its not started yet
+        // but we might want to put cfg data to control the log so this
+        // needs to be first.
         Serial.println("An Error has occurred while mounting SPIFFS");
         return;
     }
@@ -70,6 +89,7 @@ void setup()
   
     // Start supported services
     WebPageTrackMeasuring::begin(server);
+    WebPageSpeedMagic::begin(server);
     WebPageCv::begin(server);
     WebPagePurpleHat::begin(server);
     WifiFirmware::begin(server);
@@ -77,14 +97,18 @@ void setup()
   
 
     // Start underlying hardware modules
+    DigitraxBuffersModule::setup(sendMsg);
+    WiThrottleModule::setup();
     PurpleHatModule::setup(); 
          
+    // Leave this last so when you see this on the M5 screen you know
+    // that the M5 is good to go...     
     M5.Lcd.println("HTTP server started");    
 }
 
 void loop()
 { 
-    u32_t time = millis();
+    u32_t time = millis();    
 
     if(!TimeClient::update())
     {
@@ -108,7 +132,11 @@ void loop()
     delay(2);
     WebPageTrackMeasuring::loop();
     delay(2);
-    WebPagePurpleHat::loop();  
+    WebPageSpeedMagic::loop();
+    delay(2);   
+    WiThrottleModule::loop();
+    delay(2);
+    DigitraxBuffersModule::loop();
 
     // This will "feed the watchdog".
     delay(2);

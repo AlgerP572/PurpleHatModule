@@ -7,14 +7,14 @@ bool ConfigLoader::readFile(const String& fileName,  String& buffer)
 {
     if (!SPIFFS.exists(fileName))
     {       
-        Log::print("File" + fileName + "not found\n", LogLevel::ERROR);
+        Log::print("File" + fileName + " not found\n", LogLevel::ERROR);
         return false;
     }
 
     File dataFile = SPIFFS.open(fileName, "r");
     if (!dataFile)
     {        
-        Log::print("Can't open" + fileName +" \n", LogLevel::ERROR);
+        Log::print("Can't open " + fileName +" \n", LogLevel::ERROR);
         return false;
     }
 

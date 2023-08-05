@@ -317,7 +317,7 @@ void IoTT_TrainSensor::displayIMUSensorStatus()
 		Serial.print("IMU Sensor not available");
 }
 
-void IoTT_TrainSensor::loadLNCfgJSON(DynamicJsonDocument doc)
+void IoTT_TrainSensor::loadLNCfgJSON(DynamicJsonDocument& doc)
 {
 //	Serial.println("Call JSON Serial");
 	if (doc.containsKey("UseMag"))

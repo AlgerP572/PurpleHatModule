@@ -850,9 +850,9 @@ void IoTT_DigitraxBuffers::processLoop()
 	lnTransmitMsg txBuffer;
 	if (dccPort)
 	{
-//		Serial.print(dccPort->getMsgType());
+		Serial.print(dccPort->getMsgType());
 		dccPort->processLoop();
-//		Serial.println();
+		Serial.println();
 	}
 
 	if (millis() > nextSlotUpdate)
@@ -860,7 +860,7 @@ void IoTT_DigitraxBuffers::processLoop()
 
 		if ((!isCommandStation) && isLocoNet)
 		{
-//			Serial.println("request slot");
+			Serial.println("request slot");
 //			if (!focusNextAddr) //pause process if waiting for a focus slot for purplehat
 //				requestNextSlotUpdate();
 		}
@@ -873,7 +873,7 @@ void IoTT_DigitraxBuffers::processLoop()
 			if (inpQuery != 0xFF)
 			{
 				queryDelay += queryInterval;
-//				Serial.printf("Set Switch %i to %i\n", 1020 - (inpQuery & 0x03), (inpQuery & 0x04) >> 2);
+				Serial.printf("Set Switch %i to %i\n", 1020 - (inpQuery & 0x03), (inpQuery & 0x04) >> 2);
 				sendSwitchCommand(0xB0, 1020 - (inpQuery & 0x03) - 1, (inpQuery & 0x04) >> 2, false);
 				inpQuery--;
 			}
@@ -887,7 +887,7 @@ void IoTT_DigitraxBuffers::processLoop()
 */		
 		if (millis() - purgeSlotTimer > purgeInterval) //runs every 10 secs
 		{
-//			Serial.println("check purging");
+			Serial.println("check purging");
 			purgeUnusedSlots();
 			purgeSlotTimer += purgeInterval;
 		}
@@ -896,7 +896,7 @@ void IoTT_DigitraxBuffers::processLoop()
 		{
 			if ((millis() - progSent) > (uint32_t)progTimeout)
 			{
-//				Serial.printf("Prog timeout");
+				Serial.printf("Prog timeout");
 				memcpy(&slotBuffer[0x7C][0], &progSlot[0], 10);
 				slotBuffer[0x7C][1] = 0x04;
 				prepSlotReadMsg(&txBuffer, 0x7C);
@@ -910,6 +910,7 @@ void IoTT_DigitraxBuffers::processLoop()
 		if (!progModeActive) //prog track available
 			if (readFullAddr)
 			{
+                Serial.printf(" ProgRead");
 				std::vector<ppElement> ppList;
 				ppElement newData;
 				newData.dataType = 1;
@@ -931,7 +932,7 @@ void IoTT_DigitraxBuffers::processLoop()
 								readProg(0,0,0,18); 
 							else 
 							{
-//								Serial.println("OK"); 
+								Serial.println("OK"); 
 								if (wiAddrCallback !=  NULL)
 								{
 									newData.payload.longVal = cvBuffer.at(1) & 0x00FF;
@@ -943,7 +944,7 @@ void IoTT_DigitraxBuffers::processLoop()
 							break;
 					case 3: 
 							{
-//								Serial.println("OK"); 
+								Serial.println("OK"); 
 								char outBuf[10];
 								if (wiAddrCallback !=  NULL)
 								{
@@ -968,12 +969,15 @@ void IoTT_DigitraxBuffers::processLoop()
 	}
 	
 	if ((millis() - fcLastBroadCast) > fcBroadcastInterval)
-	{
+	{       
 		prepSlotWriteMsg(&txBuffer, 0x7B);
 		if (broadcastFC)
+        {     
+            Serial.printf(" PrepSlot");       
 			lnOutFct(txBuffer);
+        }
 		fcLastBroadCast = millis(); //+= fcBroadcastInterval;
-//		Serial.printf(" Broadcast FC %i:%i -> %i\n", trunc(intFastClock/3600), trunc((intFastClock % 3600)/60), intFastClock);
+		Serial.printf(" Broadcast FC %i:%i -> %i\n", trunc(intFastClock/3600), trunc((intFastClock % 3600)/60), intFastClock);
 	}
 
 	if (millis() > nextBufferUpdate)
@@ -984,7 +988,7 @@ void IoTT_DigitraxBuffers::processLoop()
 		if (millis() > 20000)
 		{
 			initPhase = false;
-//			Serial.println("Init report");
+			Serial.println("Init report");
 			requestInpStatusUpdate = 0xFF;
 		}
 }
