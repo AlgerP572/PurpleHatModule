@@ -28,6 +28,13 @@ html {
     width: 120px;
    }
 
+  .profilebutton {
+    border: 1px solid black ;
+    background-color: #D4C0D4;
+    height: 20px;
+    width: 60px;
+   }
+
    .button-container {
     display: flex;
     padding: 10px 24px; 

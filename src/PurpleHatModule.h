@@ -25,6 +25,9 @@ public:
     static void RepRate(int repRate);
     static void SetDccAddr(int16_t dccAddr);
     static void GetSensorData(String& sensorData);
+    static void GetSpeedTestData(String& speedTableData);
+    static void startTest(float_t trackLen, float_t vMax, uint8_t pMode);
+    static void stopTest(String& speedTableData);
 };
 
 #endif

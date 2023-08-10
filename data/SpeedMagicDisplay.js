@@ -6,6 +6,10 @@ var statsData;
 var	locoAddr = -1;
 var locoAddrValid = false;
 
+var throttleDef = {"DataType" : "ThrottleDef", "Version" : "1.0", "ProfName":"new profile", "VMax":50, "AtStep":100, "SpeedSteps":128, "GraphData" : {}, "FileName":""};
+var trackLen = 2500;
+var maxTestSpeed = 50;
+
 var cvVal_2 = 0;
 var cvVal_3 = 0;
 var cvVal_4 = 0;
@@ -30,35 +34,46 @@ function onClose(event) {
 
 window.addEventListener('load', onLoad);
 
-var chart;
+var profileChart;
 var currentX = 0;
 
-function plotSpeed(jsonValue) {
+function plotSpeedTable(jsonValue)
+{
+    var data = jsonValue.Data;
+    console.log(data);
 
-  var data = jsonValue.Data;
-  console.log(data);
-  var x = ++currentX; // (new Date()).getTime();
-  var y = Number(data.Speed);
+    for(let i = 0; i < data.NumSteps; i++)
+    {
+        profileChart.data.datasets[1].data[i] = { x: i, y: data.fw[i]};
+        profileChart.data.datasets[2].data[i] = { x: i, y: data.bw[i]};
 
-  document.getElementById("angle").innerHTML = data.AxisAngle.toFixed(2);    
+        var scaleSpeed = (data.fw[i] * 36 * Number(configData.ScaleList[configData.ScaleIndex].Scale)) / 10000; //[km/h]
+        profileChart.data.datasets[3].data[i] = { x: i, y: scaleSpeed};
 
-     // if(chart.data.labels.length > 400) {
-      chart.data.labels.push(x);
-      chart.data.datasets[0].data.push(y);
-      chart.data.datasets[1].data.push(scaleSpeed);
-    //} else {
-    //  chartT.series[0].addPoint([x, y], true, false, true);
-   // }
-  chart.update();
+        scaleSpeed = (data.bw[i] * 36 * Number(configData.ScaleList[configData.ScaleIndex].Scale)) / 10000; //[km/h]
+        profileChart.data.datasets[4].data[i] = { x: i, y: scaleSpeed};
+    }
+     
+    profileChart.update();
 }
 
 function  UpdateUI()
 {
+  document.getElementById("speedstep").innerHTML = configData.SpeedStep;
+
   document.getElementById("wheeldiameter").innerHTML = configData.WheelDia.toFixed(2);  
   document.getElementById("scaleunit").innerHTML = "1:" + configData.ScaleList[configData.ScaleIndex].Scale;
  
-  chart.options.scales['y1'].title.text = 'Scale (' + configData.ScaleList[configData.ScaleIndex].Name + "  1:" + configData.ScaleList[configData.ScaleIndex].Scale + ') Speed [km/h]';
-  chart.update();
+  profileChart.options.scales['y1'].title.text = 'Scale (' + configData.ScaleList[configData.ScaleIndex].Name + "  1:" + configData.ScaleList[configData.ScaleIndex].Scale + ') Speed [km/h]';
+  profileChart.update();
+}
+
+function plotSpeed(jsonValue) {
+    var data = jsonValue.Data;
+    console.log(data);    
+
+    document.getElementById("speedstep").innerHTML = data.SpeedStep;
+    document.getElementById("direction").innerHTML = ((data.DirF & 0x20) == 0x20) ? "For" : "Rev";   
 }
 
 function  UpdateFooter()
@@ -97,10 +112,17 @@ if (!!window.EventSource) {
   }, false);
 
   source.addEventListener('SpeedData', function(e) {
-    //console.log("Speed Magic new_readings", e.data);
+    //console.log("Track Measuring new_readings", e.data);
     var myObj = JSON.parse(e.data);
 //    console.log(myObj);
     plotSpeed(myObj);
+  }, false);
+
+  source.addEventListener('SpeedTableData', function(e) {
+    //console.log("Speed Magic new_readings", e.data);
+    var myObj = JSON.parse(e.data);
+//    console.log(myObj);
+    plotSpeedTable(myObj);
   }, false);
 
   source.addEventListener('CfgData', function(e) {
@@ -125,29 +147,58 @@ function onLoad(event) {
   getConfig();
 
   // This requires the prvious two.
-  initChart();  
+  initProfileChart();  
 }
 
-function initChart(){
+function initProfileChart(){
   ctx = document.getElementById("chart-speed-data").getContext("2d");
-  chart = new Chart(ctx, {
-    type: "line",
+  profileChart = new Chart(ctx, {
+    type: "scatter",
     data: {
       datasets: [{
-        label: "Measured Speed [mm/s]",
+        label: "Throttle Profile [km/h]",
+        borderWidth: 1,
+        pointRadius: 2,
+        backgroundColor: '#C08080',
+        borderColor: '#C08080',
+        yAxisID: 'y1',
+        showLine: true
+      },
+      {
+        label: "fw Speed [mm/s]",
         borderWidth: 1,
         pointRadius: 2,
         backgroundColor: '#80C080',
         borderColor: '#80C080',
         yAxisID: 'y',
+        showLine: true
       },
       {
-        label:"Scale Speed [km/h]",
+        label: "bw Speed [mm/s]",
         borderWidth: 1,
         pointRadius: 2,
         backgroundColor: '#8080C0',
         borderColor: '#8080C0',
+        yAxisID: 'y',
+        showLine: true
+      },
+      {
+        label:"fw Speed [km/h]",
+        borderWidth: 1,
+        pointRadius: 2,
+        backgroundColor: '#80C0C0',
+        borderColor: '#80C0C0',
         yAxisID: 'y1',
+        showLine: true
+      },
+      {
+        label:"bw Speed [km/h]",
+        borderWidth: 1,
+        pointRadius: 2,
+        backgroundColor: '#C080C0',
+        borderColor: '#C080C0',
+        yAxisID: 'y1',
+        showLine: true
       }],
     },
     options: {
@@ -219,7 +270,7 @@ function loadJMRIDecoder(sender)
 			return;
 		}
         validLocoDef = displayDecoder(locoDef);
-		setButtonStatus();
+//		setButtonStatus();
     };
     xmlFile = fileName;
     reader.readAsText(fileName);	
@@ -240,24 +291,24 @@ function displayDecoder(xmlNode)
 			hasSpeedTable = attr.getAttribute("value");
 		if (hasSpeedTable == 1)
 		{
-			cvVal = xmlNode.getElementsByTagName("CVvalue");
+//			cvVal = xmlNode.getElementsByTagName("CVvalue");
 //			speedTableProfileGraph.LineGraphs[0].DataElements.length = 0;//delete old data
-			var newEl = JSON.parse(JSON.stringify(DataElementTemplate));
-			newEl.x = 0;
-			newEl.y = 0;
+//			var newEl = JSON.parse(JSON.stringify(DataElementTemplate));
+//			newEl.x = 0;
+//			newEl.y = 0;
 //			speedTableProfileGraph.LineGraphs[0].DataElements.push(newEl);
-			console.log(xmlNode);
-			for (var i = 0; i < 28; i++) //28 table entries by definition
-			{
-				var cv = findXMLAttribute(cvVal, "name", (i+67).toString());
-				if (cv)
-				{
-					newEl = JSON.parse(JSON.stringify(DataElementTemplate));
-					newEl.x = i+1;
-					newEl.y = cv.getAttribute("value");
+//			console.log(xmlNode);
+//			for (var i = 0; i < 28; i++) //28 table entries by definition
+//			{
+//				var cv = findXMLAttribute(cvVal, "name", (i+67).toString());
+//				if (cv)
+//				{
+//					newEl = JSON.parse(JSON.stringify(DataElementTemplate));
+//					newEl.x = i+1;
+//					newEl.y = cv.getAttribute("value");
 //					speedTableProfileGraph.LineGraphs[0].DataElements.push(newEl);
-				}
-			}
+//				}
+//			}
 		}
 	}
 //	drawProfileBox(canvasElementSpeedTable, speedTableProfileGraph);
@@ -289,10 +340,73 @@ function displayDecoder(xmlNode)
 		var newAddr = xmlNode.getElementsByTagName("locomotive")[0].getAttribute("dccAddress");
 		locoAddr = -1;
 		reqDCCAssign(newAddr);
+        locoAddr = newAddr;
 	}
 	else
 		console.log("Not Locomotive data");
 	return isLoco;
+}
+
+function loadThrottleDlg(sender)
+{
+    console.log("Click", sender);
+    document.getElementById("load-profile-btn").click();
+}
+
+function loadThrottle(sender)
+{
+    console.log("Load Throttle File", sender);
+    loadThrottleFile(sender);
+}
+
+function loadThrottleFile(sender)
+{
+	fileName = document.getElementById("load-profile-btn").files[0];
+//	console.log(fileName);
+	var reader = new FileReader();
+	
+    reader.onload = function()
+    {
+        try 
+        {
+			throttleDef = JSON.parse(reader.result);
+			throttleDef.GraphData.DimY = "km/h";
+			throttleDef.FileName = fileName.name;
+		}
+		catch(err) 
+		{
+			throttleDef.fileName = "";
+			alert("Not a valid throttle profile");
+			return;
+		}
+        validThrottleDef = throttleDef.DataType == "ThrottleDef";
+        if (!validThrottleDef)
+        {
+			throttleDef.fileName = "";
+			alert("Not a valid throttle profile");
+			return;
+		}
+		var graphData = JSON.parse(JSON.stringify(throttleDef.GraphData));
+        console.log(graphData);
+
+        for(let i = 0; i < graphData.DataElements.length; i++)
+        {
+            profileChart.data.datasets[0].data.push({ x: graphData.DataElements[i].x, y: graphData.DataElements[i].y});
+            //profileChart.data.datasets[0].data.push(graphData.DataElements[i].y);
+        }
+
+        console.log(graphData);
+//		throttleProfileGraph.LineGraphs[0].Color = JSON.parse(JSON.stringify(graphColorThrottle));
+//		throttleProfileGraph.LineGraphs[0].Width = JSON.parse(JSON.stringify(graphLineThrottle));
+//		createThrottleGraph(throttleDef, throttleProfileGraph);
+//        displayThrottleDef(throttleDef);
+//		drawProfileBox(canvasElementThrottle, throttleProfileGraph);
+//		setButtonStatus();
+        profileChart.update();	
+    };
+    jsonFile = fileName;
+    reader.readAsText(fileName);
+    
 }
 
 function reqDCCAssign(forAddress)
@@ -375,3 +489,81 @@ function formatTime(seconds) {
       .join(":")
       .replace(/\b(\d)\b/g, "0$1")
 }
+
+function setTrackLength(sender)
+{
+	trackLen = verifyNumber(sender.value, configData.TrackLen); 
+}
+
+function setTestSpeed(sender)
+{
+	maxTestSpeed = verifyNumber(sender.value, configData.MaxTestSpeed);	
+}
+
+function startSpeedTest(sender)
+{
+//	processSpeedTableInput(testObj);
+//	return;
+	
+	if (locoAddr < 0)
+    {
+		alert("No DCC Address assigned! Verify connection to WiThrottle Server and reload JMRI file");
+		//document.getElementById("btnLoadDecoder").files = [];
+	}		
+	else
+	{
+
+		if ((cvVal_2 != 0) || (cvVal_5 != 0) || (cvVal_6 != 0) || ((cvVal_29 & 0x10) != 0))
+		{
+			var dispText = "Verify and confirm CV settings before running the speed test.\nCV 2 expected 0 is " + cvVal_2 + "\nCV 5 expected 0 is " + cvVal_5 + "\nCV 6 expected 0 is " + cvVal_5 + "\nCV 29 Bit 4 expected 0 is " + ((cvVal_29 & 0x10)>>4) +  "\nProceed anyway?";
+			if (confirm(dispText) == false)
+				return;
+		}
+
+		var trkLen = trackLen;
+		if (isNaN(trkLen))
+		{
+			alert("No Test Track length specified");
+			return;
+		}
+		var techSpeed = (1000 * maxTestSpeed / 3.6) / configData.ScaleList[configData.ScaleIndex].Scale;
+		if (isNaN(techSpeed))
+		{
+			alert("No maximum speed specified");
+			return;
+		}
+		
+		websocket.send("{\"Cmd\":\"SetSensor\", \"SubCmd\":\"RunTest\",\"TrackLen\":" + trkLen.toString() + ", \"Addr\":" + locoAddr.toString()+ ", \"VMax\":" + techSpeed.toString() + ", \"Mode\":" + 127 + "}");
+	}
+}
+
+function stopSpeedTest(sender)
+{
+	websocket.send("{\"Cmd\":\"SetSensor\", \"SubCmd\":\"StopTest\"}");
+}
+
+function verifyNumber(inpValue, defValue)
+{
+	var numVal;
+	if (isNaN(inpValue))
+	{
+		alert(inpValue + " is not a valid number. Please verify");
+		return defValue;	
+	}
+	else
+		return parseFloat(inpValue);
+}
+
+function verifyNumArray(inpValue, sepChar)
+{
+	var newInp = inpValue.split(sepChar);
+	var newRes = [];
+	for (var i=0; i < newInp.length; i++)
+	{
+		var hlpRes = parseInt(newInp[i]);
+		if (!isNaN(hlpRes))
+			newRes.push(hlpRes);
+	}
+	return newRes;
+}
+

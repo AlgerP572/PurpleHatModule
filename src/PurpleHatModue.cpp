@@ -38,7 +38,7 @@ void PurpleHatModule::begin()
 }
 
 void PurpleHatModule::loop()
-{
+{     
 }
 
 void PurpleHatModule::ResetDistance()
@@ -75,10 +75,38 @@ void PurpleHatModule::GetSensorData(String& sensorData)
 {
     if (_trainSensor != NULL)
     {
-        _trainSensor->processLoop(sensorData);
+        _trainSensor->processSensorLoop(sensorData);
     }
     else
     {
         sensorData.clear();
     }    
+}
+
+void PurpleHatModule::GetSpeedTestData(String& speedTableData)
+{
+    if (_trainSensor != NULL)
+    {
+        _trainSensor->processSpeedTestLoop(speedTableData);
+    }
+}
+
+void PurpleHatModule::startTest(float_t trackLen, float_t vMax, uint8_t pMode)
+{    
+    if (_trainSensor != NULL)
+    {
+        Log::print("Start test: ", LogLevel::INFO);
+        Log::print("trackLen = ", LogLevel::INFO);
+        Log::println(trackLen, LogLevel::INFO);
+
+        _trainSensor->startTest(trackLen, vMax, pMode);
+    }
+}
+
+void PurpleHatModule::stopTest(String& speedTableData)
+{
+     if (_trainSensor != NULL)
+     {
+        _trainSensor->stopTest(speedTableData);
+     }
 }

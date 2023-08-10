@@ -105,7 +105,27 @@ char WebPageSpeedMagic::_html[] PROGMEM = R"rawliteral(
       </table></p>
       </div>      
       <div class="card">
-          <p class="card-title">Speed Magic</p>
+            <p><table class="datatable">
+                <tr>
+                    <td>Throttle:</td>
+                    <input type="file" id="load-profile-btn" style="display:none" onChange="loadThrottle(this)"/>
+                    <td><button id="load-profile-button" class="profilebutton" onClick="loadThrottleDlg(this)">Load</button></td>
+                    <td><button id="button" class="profilebutton">Save</button></td>
+                    <td>Speed Step</th>
+                    <td><span id="speedstep">%coretemp%</span></th>
+                    <td>Direction</th>
+                    <td><span id="direction">%direction%</span></th>
+                </tr>
+                <tr>
+                    <td>Speed Test:</td>
+                    <td><button id="start-speed-test" class="profilebutton" onClick="startSpeedTest(this)">Start</button></td>
+                    <td><button id="stop-speed-test" class="profilebutton" onClick="stopSpeedTest(this)">Stop</button></td>
+                    <td><span>Length [mm]</span></td>
+                    <td><input type="number" min="1" max="50000" value="2500" onchange="setTrackLength(this)"/></td>
+                    <td><span>v Max [km/h]</td>
+                    <td><input type="number" min="1" max="150" value="50" onchange="setTestSpeed(this)"/></td>
+                </tr>
+            </table></p>
           <canvas id="chart-speed-data" width="600" height="400"></canvas>
         </div>
     </div>
@@ -198,7 +218,21 @@ void WebPageSpeedMagic::handleWebSocketMessage(void *arg, uint8_t *data, size_t 
                 Log::println(dccAddr, LogLevel::INFO);
 
                 PurpleHatModule::SetDccAddr(dccAddr);          
-            }            
+            } 
+            if(subCmd == "RunTest")           
+            {               
+                float tLen = doc["TrackLen"];
+                float vMax = doc["VMax"];
+                uint8_t pMode = doc["Mode"];
+
+                PurpleHatModule::startTest(tLen, vMax, pMode);
+            }
+            if(subCmd == "StopTest")
+            {  
+                String speedTableData;
+                speedTableData.reserve(4096); // ??
+                PurpleHatModule::stopTest(speedTableData);
+            }
         }
         if (thisCmd == "CfgData") // Config Request Format: {"Cmd":"CfgData", "Type":"pgxxxxCfg", "FileName":"name"}
         {
@@ -311,6 +345,7 @@ void WebPageSpeedMagic::loop()
         return;
     }
     _ws.cleanupClients();
+    delay(2);
 
     if ((millis() - _lastTime) > _timerDelay)
     {
@@ -330,8 +365,20 @@ void WebPageSpeedMagic::loop()
             millis());
 
         // Get speed data
+        String latestSpeedTableData;
+        latestSpeedTableData.reserve(4096);
+        PurpleHatModule::GetSpeedTestData(latestSpeedTableData);
+        if (latestSpeedTableData.isEmpty() == false)
+        {
+            Log::println(latestSpeedTableData.c_str(), LogLevel::LOOP);
+            _events.send(latestSpeedTableData.c_str(),
+                         "SpeedTableData",
+                         millis());
+        }
+
+        // Get speed data
         String latestSpeedData;
-        latestSpeedData.reserve(512);
+        latestSpeedData.reserve(1024);
         PurpleHatModule::GetSensorData(latestSpeedData);
         if (latestSpeedData.isEmpty() == false)
         {

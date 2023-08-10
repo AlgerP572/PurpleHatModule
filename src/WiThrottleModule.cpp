@@ -11,7 +11,7 @@ IoTT_LBServer* wiServer = NULL; // for exsting IOTT code. NOT being used at pres
 uint16_t  WiThrottleModule::sendMsg(lnTransmitMsg txData)
 { 
     Log::println("Send msg", LogLevel::INFO);    
-    WiThrottleModule::_lbClient->lnWriteMsg(&txData);
+    WiThrottleModule::_lbClient->lnWriteMsg(&txData);   
     return 0;
 }
 
@@ -19,6 +19,7 @@ void callbackLocoNetMessage(lnReceiveBuffer * newData) //this is the landing poi
                                                        //from LocoNet interfaces
 {
     // needed by exsting IOTT code. NOT being used at present...
+     Log::println("New Data msg", LogLevel::INFO);    
 }
 
 void WiThrottleModule::setup()

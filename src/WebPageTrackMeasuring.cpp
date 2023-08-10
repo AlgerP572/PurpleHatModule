@@ -334,7 +334,7 @@ void WebPageTrackMeasuring::loop()
 
         // Get speed data
         String latestSpeedData;
-        latestSpeedData.reserve(512);
+        latestSpeedData.reserve(1024);
         PurpleHatModule::GetSensorData(latestSpeedData);
         if (latestSpeedData.isEmpty() == false)
         {

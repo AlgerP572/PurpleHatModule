@@ -28,3 +28,8 @@ void DigitraxBuffersModule::loop()
 {
     _digitraxBuffer->processLoop();
 }
+
+void DigitraxBuffersModule::processLocoNetMsg(lnReceiveBuffer* newData)
+{
+    _digitraxBuffer->processLocoNetMsg(newData);
+}

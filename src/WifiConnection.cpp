@@ -32,17 +32,17 @@ bool WifiConnection::setup(AsyncWebServer* server, DNSServer* dns, bool reset)
     //  14                      10.0.100.114
     //  415                     10.0.104.115
     //  3985                    10.0.139.185
-    wm.autoConnect("Wireless-DCC-Decoder-Get-Setup");
+    return wm.autoConnect("Wireless-DCC-Decoder-Get-Setup");
 
-    IPAddress gateway2 = WiFi.gatewayIP();
-    byte first = gateway2[0];
-    WiFi.disconnect();
+//     IPAddress gateway2 = WiFi.gatewayIP();
+//     byte first = gateway2[0];
+//     WiFi.disconnect();
 
-    // set custom static ip for portal
-    IPAddress staticIP(10,0,100,120);  //ESP static ip
-    IPAddress gateway(10,0,0,1); //IP Address of your WiFi Router (Gateway)
-    IPAddress subnet(255,255,0,0); //Subnet mask
-    wm.setSTAStaticIPConfig(staticIP, gateway, subnet);
+//     // set custom static ip for portal
+//     IPAddress staticIP(10,0,100,120);  //ESP static ip
+//     IPAddress gateway(10,0,0,1); //IP Address of your WiFi Router (Gateway)
+//     IPAddress subnet(255,255,0,0); //Subnet mask
+//     wm.setSTAStaticIPConfig(staticIP, gateway, subnet);
    
-   return wm.autoConnect("Wireless-DCC-Decoder"); // auto generated AP name from chipid  
+//    return wm.autoConnect("Wireless-DCC-Decoder"); // auto generated AP name from chipid  
 }

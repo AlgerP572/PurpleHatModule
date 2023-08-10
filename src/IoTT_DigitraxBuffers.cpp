@@ -1662,6 +1662,12 @@ void IoTT_DigitraxBuffers::awaitFocusSlot(int16_t dccAddr, bool simulOnly)
 {
 	focusNextAddr = true;
 	focusSlot = -1;
+
+    if(simulOnly == true)
+    {
+        focusSlot = getSlotOfAddr(dccAddr & 0x7F, dccAddr >> 7);
+    }
+
 //	Serial.println("Await");
 	if (dccAddr > 0)
 	{
@@ -2735,6 +2741,8 @@ void IoTT_DigitraxBuffers::setSlotDirfSpeed(lnReceiveBuffer * newData)
 //			else
 //				Serial.printf("Slot %i not initialized\n", focusSlot);
 		}
+
+        Serial.printf("Buffer update: %i, %i\n",  newData->lnData[1],  newData->lnData[0]);
 		switch (newData->lnData[0])
 		{
 			case 0xA0://OPC_LOCO_SPD

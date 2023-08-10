@@ -21,7 +21,13 @@ unsigned long _timerDelay = 10000;
 
 uint16_t sendMsg(lnTransmitMsg txData)
 {    
-    return  WiThrottleModule::sendMsg(txData);
+    uint16_t result =  WiThrottleModule::sendMsg(txData);
+
+    lnReceiveBuffer msgData;    
+	memcpy(&msgData.lnData[0], txData.lnData, txData.lnMsgSize);
+
+    DigitraxBuffersModule::processLocoNetMsg(&msgData);
+    return result;
 }
 
 void setup()
@@ -54,10 +60,10 @@ void setup()
 
     // I have found using the goolge standard nameserver a little more robust.
     // Than the default provided by my ISP.
-    WiFi.config(WiFi.localIP(),
-        WiFi.gatewayIP(),
-        WiFi.subnetMask(),
-        IPAddress(8,8,8,8)); 
+    // WiFi.config(WiFi.localIP(),
+    //      WiFi.gatewayIP(),
+    //      WiFi.subnetMask(),
+    //      IPAddress(8,8,8,8)); 
 
     // Initialize a NTPClient to get time
     TimeClient::begin();
@@ -110,10 +116,10 @@ void loop()
 { 
     u32_t time = millis();    
 
-    if(!TimeClient::update())
-    {
-        TimeClient::forceUpdate();
-    }
+    //if(!TimeClient::update())
+    //{
+        //TimeClient::forceUpdate();
+    //}
     
     if ((time - _lastTime) > _timerDelay)
     {

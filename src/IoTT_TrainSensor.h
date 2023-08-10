@@ -114,7 +114,7 @@ typedef struct
 typedef struct
 {
 	bool speedTestRunning = false; //test in progress
-	uint8_t masterPhase = 0; //0: test running 1: creep to end of track 2: reverse direction
+	int16_t masterPhase = 0; //0: test running 1: creep to end of track 2: reverse direction
 	float_t testTrackLen = 0; //available track len in mm
 	uint8_t testSteps = 0; // steps by default
 	float sampleMinDistance = 500; //mm, calculated based on wheel diameter and # of turns
@@ -129,6 +129,7 @@ typedef struct
 	uint32_t measureStartTime = micros();
 	bool validSample = false; //tell the task to record sample data in speed table
 	float_t testStartLinIntegrator = 0; //the distance reading the testSpeed was considered achieved
+    float_t testRemainingDistanceStartingLinIntegrator = 0;
 	
 	float_t vMaxTest = 300;
 
@@ -150,8 +151,9 @@ public:
 	IoTT_TrainSensor(TwoWire * newWire, uint8_t sda, uint8_t scl);
 	~IoTT_TrainSensor();
 	void begin();
-	void processLoop(String& sensorData);
-	sensorData getSensorData();
+	void processSensorLoop(String& sensorData);
+    void processSpeedTestLoop(String& speedTestData);
+   	sensorData getSensorData();
 	void resetDistance();
 	void resetHeading();
 	float_t getPercOfAngle(float_t gForce);
@@ -161,18 +163,19 @@ public:
 	void setRepRate(AsyncWebSocketClient * newClient, int newRate);
 	void reqDCCAddrWatch(AsyncWebSocketClient * newClient, int16_t dccAddr, bool simulOnly);
 	void startTest(float_t trackLen, float_t vMax, uint8_t pMode);
-	void stopTest();
+	void stopTest(String& speedTableData);
 	void sendSpeedCommand(uint8_t newSpeed);
+    void forwardDirCommand();
 	void toggleDirCommand();
 	void programmerReturn(uint8_t * programmerSlot);
    
 private:
-	void sendSpeedTableDataToWeb(bool isFinal);
+	void sendSpeedTableDataToWeb(bool isFinal, String& speedTableData);
 //	void sendPosDataToWeb();
 	void  sendSensorDataToWeb(String& sensorData);
-	void clrSpeedTable();
+	void clrSpeedTable(String& speedTableData);
 	bool processTestStep(sensorData * sensStatus);
-	bool processSpeedTest(); //returns false if complete
+	bool processSpeedTest(String& speedTableData); //returns false if complete
 	void displayIMUSensorDetails();
 	void displayIMUSensorStatus();
 	bool proceedToTrackEnd(bool origin);
