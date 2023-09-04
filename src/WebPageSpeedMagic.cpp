@@ -44,12 +44,56 @@ char WebPageSpeedMagic::_html[] PROGMEM = R"rawliteral(
   <div class="content">
     <div class="card-grid">
       <div class="card">
-        <div class="button-container">
-            <input type="file" id="load-btn" style="display:none" onChange="loadJMRIFile(this)"/>
-            <button id="load-button" class="button" onClick="loadJMRIDlg(this)">Load JMRI file</button>
-            <button class="button" onClick=" resetDistance(this)">Save JMRI file</button>
-        </div>                   
         <p><table class="datatable">
+             <tr>
+                <th>Input:</th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+            </tr>
+             <tr>
+                <td>JMRI File:</td>               
+                <td>
+                    <div class="tool-bar-graph"> 
+                        <input type="file" id="load-btn" style="display:none" onChange="loadJMRIFile(this)"/>
+                        <button id="load-button" onClick="loadJMRIDlg(this)">Load</button>
+                        <button onClick=" resetDistance(this)">Save</button>
+                    </div>
+                </td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>Throttle:</td>               
+                <td>
+                    <div class="tool-bar-graph"> 
+                        <input type="file" id="load-profile-btn" style="display:none" onChange="loadThrottle(this)"/>
+                        <button id="load-profile-button" onClick="loadThrottleDlg(this)">Load</button>
+                        <button id="button">Save</button>
+                    </div>
+                </td>
+                <td>Speed Step</td>
+                <td><span id="speedstep">%coretemp%</span></td>
+                <td>Direction</td>
+                <td><span id="direction">%direction%</span></td>
+            </tr>
+            <tr>
+                <td>Speed Test:</td>
+                <td>
+                    <div class="tool-bar-graph"> 
+                        <button id="start-speed-test"  onClick="startSpeedTest(this)">Start</button>
+                        <button id="stop-speed-test" onClick="stopSpeedTest(this)">Stop</button>
+                    </div>
+                </td>
+                <td><span>Length [mm]</span></td>
+                <td><input type="number" min="1" max="50000" value="13500" onchange="setTrackLength(this)"/></td>
+                <td><span>v Max [km/h]</td>
+                <td><input type="number" min="1" max="150" value="50" onchange="setTestSpeed(this)"/></td>
+            </tr>        
         <tr>
             <th colspan="3">Data</th>
             <th colspan="3">Value</th>        
@@ -105,29 +149,27 @@ char WebPageSpeedMagic::_html[] PROGMEM = R"rawliteral(
       </table></p>
       </div>      
       <div class="card">
+            <div class="tool-bar-graph">
+                <button id="testCsv" class="profilebutton">To Csv</button>
+                <input type="file" id="load-speedData-btn" style="display:none" onChange="loadSpeedData(this)"/>
+                <button id="importCsv" class="profilebutton" onClick="loadSpeedDataDlg(this)">Ld Csv</button>
+                <button id="calculate" class="profilebutton" onClick="calcTable(this)">Calc</button>
+                <p>Profile Test</p>
+            </div>            
+            <canvas id="chart-speed-data" width="600" height="400"></canvas>
             <p><table class="datatable">
                 <tr>
-                    <td>Throttle:</td>
-                    <input type="file" id="load-profile-btn" style="display:none" onChange="loadThrottle(this)"/>
-                    <td><button id="load-profile-button" class="profilebutton" onClick="loadThrottleDlg(this)">Load</button></td>
-                    <td><button id="button" class="profilebutton">Save</button></td>
-                    <td>Speed Step</th>
-                    <td><span id="speedstep">%coretemp%</span></th>
-                    <td>Direction</th>
-                    <td><span id="direction">%direction%</span></th>
+                    <th>FW trim</th>
+                    <th>Speed table</th>
+                    <th>BW trim</th>  
                 </tr>
                 <tr>
-                    <td>Speed Test:</td>
-                    <td><button id="start-speed-test" class="profilebutton" onClick="startSpeedTest(this)">Start</button></td>
-                    <td><button id="stop-speed-test" class="profilebutton" onClick="stopSpeedTest(this)">Stop</button></td>
-                    <td><span>Length [mm]</span></td>
-                    <td><input type="number" min="1" max="50000" value="2500" onchange="setTrackLength(this)"/></td>
-                    <td><span>v Max [km/h]</td>
-                    <td><input type="number" min="1" max="150" value="50" onchange="setTestSpeed(this)"/></td>
+                    <td><span id="fwTrim" style='font-size: 8pt;'>%fwTrim%</span></td>
+                    <td><span id="speedTable" style='font-size: 8pt;'>%speedTable%</span></td>
+                    <td><span id="bwTrim" style='font-size: 8pt;'>%bwTrim%</span></td>
                 </tr>
-            </table></p>
-          <canvas id="chart-speed-data" width="600" height="400"></canvas>
-        </div>
+            </table></p>        
+      </div>
     </div>
   </div>
   <div class="topnav">
@@ -166,6 +208,9 @@ char WebPageSpeedMagic::_html[] PROGMEM = R"rawliteral(
       </tr>
     </table></p>
   </div>
+  <script src="regression.js"></script>
+  <script src="canvasjsascsv.min.js"></script>
+  <script src="papaparse.min.js"></script> 
   <script src="SpeedMagicDisplay.js"></script>  
 </body>
 </html>)rawliteral";
@@ -173,9 +218,11 @@ char WebPageSpeedMagic::_html[] PROGMEM = R"rawliteral(
 AsyncWebSocket WebPageSpeedMagic::_ws("/wsspeedmagic");
 AsyncEventSource WebPageSpeedMagic::_events("/eventsspeedmagic");
 unsigned long WebPageSpeedMagic::_lastTime = 0;
+unsigned long WebPageSpeedMagic::_lastTestTime = 0;
 unsigned long WebPageSpeedMagic::_timerDelay = 1000;
 int WebPageSpeedMagic::_millisRollOver = 0;
 unsigned long WebPageSpeedMagic::_lastMillis = 0;
+String WebPageSpeedMagic::_latestSpeedTableData = "";
 String WebPageSpeedMagic::BBVersion = "1.6.0";
 
 void WebPageSpeedMagic::handleWebSocketMessage(void *arg, uint8_t *data, size_t len)
@@ -232,6 +279,10 @@ void WebPageSpeedMagic::handleWebSocketMessage(void *arg, uint8_t *data, size_t 
                 String speedTableData;
                 speedTableData.reserve(4096); // ??
                 PurpleHatModule::stopTest(speedTableData);
+
+                 _events.send(speedTableData.c_str(),
+                    "SpeedTableData",
+                    millis());
             }
         }
         if (thisCmd == "CfgData") // Config Request Format: {"Cmd":"CfgData", "Type":"pgxxxxCfg", "FileName":"name"}
@@ -325,7 +376,10 @@ void WebPageSpeedMagic::begin(AsyncWebServer *server)
             "text/html",
             _html,
             processor);
-    });   
+    });
+
+    // shared between speed magic test and web event to publish.
+    _latestSpeedTableData.reserve(4096);
 }
 
 String WebPageSpeedMagic::processor(const String& var)
@@ -347,6 +401,23 @@ void WebPageSpeedMagic::loop()
     _ws.cleanupClients();
     delay(2);
 
+    if((millis() - _lastTestTime) > speedTestInterval)
+    {
+        // Get speed data     
+        _latestSpeedTableData.clear();  
+        PurpleHatModule::GetSpeedTestData(_latestSpeedTableData);       
+
+        // Send latest speed data to web.  This should happen at a much slower
+        // rate. (See the speed test state machine.)
+        if (_latestSpeedTableData.isEmpty() == false)
+        {
+            Log::println(_latestSpeedTableData.c_str(), LogLevel::LOOP);
+            _events.send(_latestSpeedTableData.c_str(),
+                         "SpeedTableData",
+                         millis());
+        }
+    }
+
     if ((millis() - _lastTime) > _timerDelay)
     {
         Log::println("-----", LogLevel::LOOP);
@@ -362,19 +433,7 @@ void WebPageSpeedMagic::loop()
         Log::println(statsData, LogLevel::LOOP);
         _events.send(statsData.c_str(),
             "STATS",
-            millis());
-
-        // Get speed data
-        String latestSpeedTableData;
-        latestSpeedTableData.reserve(4096);
-        PurpleHatModule::GetSpeedTestData(latestSpeedTableData);
-        if (latestSpeedTableData.isEmpty() == false)
-        {
-            Log::println(latestSpeedTableData.c_str(), LogLevel::LOOP);
-            _events.send(latestSpeedTableData.c_str(),
-                         "SpeedTableData",
-                         millis());
-        }
+            millis());       
 
         // Get speed data
         String latestSpeedData;

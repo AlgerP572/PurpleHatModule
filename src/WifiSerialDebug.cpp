@@ -5,7 +5,7 @@ LogLevel Log::_logLevel = // default log levels
     LogLevel::SERIALONOFF |
     // LogLevel::WIFIONOFF |
     LogLevel::INFO |
-    LogLevel::DEBUG |
+    //LogLevel::DEBUG |
     LogLevel::ERROR;
 
 std::map<String, SerialDebugCommands>  Log::_debugCommands;

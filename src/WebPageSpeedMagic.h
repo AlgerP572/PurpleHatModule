@@ -17,9 +17,11 @@ private:
     static int _millisRollOver;
     static unsigned long _lastMillis;
     static String BBVersion;
+    static String _latestSpeedTableData;
 
     // Timer variables
-    static unsigned long _lastTime;  
+    static unsigned long _lastTime;
+    static unsigned long _lastTestTime;  
     static unsigned long _timerDelay;    
     
     static void notifyClients();

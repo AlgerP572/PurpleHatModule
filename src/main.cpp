@@ -116,10 +116,10 @@ void loop()
 { 
     u32_t time = millis();    
 
-    //if(!TimeClient::update())
-    //{
-        //TimeClient::forceUpdate();
-    //}
+    if(!TimeClient::update())
+    {
+        TimeClient::forceUpdate();
+    }
     
     if ((time - _lastTime) > _timerDelay)
     {

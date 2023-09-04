@@ -30,19 +30,26 @@ function plotSpeed(jsonValue) {
   var x = ++currentX; // (new Date()).getTime();
   var y = Number(data.Speed);
 
+  // By definition running (will auto update on reconnect)
+  document.getElementById("btnStart").innerHTML = "Stop";
   document.getElementById("angle").innerHTML = data.AxisAngle.toFixed(2);
   document.getElementById("measuredspeed").innerHTML = y.toFixed(2);
   document.getElementById("direction").innerHTML = y > 0 ? "Forward" : y< 0 ? "Backward" : "Parked";
   document.getElementById("absdistance").innerHTML = data.AbsDist.toFixed(2);
   document.getElementById("reldistance").innerHTML = data.RelDist.toFixed(2);
+  document.getElementById("samplingrate").innerHTML = (1000000.0 / data.SamplingRate).toFixed(2);
 
   var scaleSpeed = (y  * 36 * Number(configData.ScaleList[configData.ScaleIndex].Scale)) / 10000; //[km/h]
   document.getElementById("scalespeed").innerHTML = scaleSpeed.toFixed(2);
 
      // if(chart.data.labels.length > 400) {
-      chart.data.labels.push(x);
-      chart.data.datasets[0].data.push(y);
-      chart.data.datasets[1].data.push(scaleSpeed);
+      chart.data.datasets[0].data.push({ x: x, y: y });
+      chart.data.datasets[1].data.push({ x: x, y: data.ScaleSpeed });
+      chart.data.datasets[2].data.push({ x: x, y: data.Accel });
+
+      // useful for crosscheck of FW speed.
+//   chart.data.datasets[2].data.push({ x: x, y: scaleSpeed });
+       
     //} else {
     //  chartT.series[0].addPoint([x, y], true, false, true);
    // }
@@ -130,7 +137,8 @@ function onLoad(event) {
 function initChart(){
   ctx = document.getElementById("chart-speed-data").getContext("2d");
   chart = new Chart(ctx, {
-    type: "line",
+    type: "scatter",
+    exportEnabled: true,
     data: {
       datasets: [{
         label: "Measured Speed [mm/s]",
@@ -139,6 +147,7 @@ function initChart(){
         backgroundColor: '#80C080',
         borderColor: '#80C080',
         yAxisID: 'y',
+        showLine: true
       },
       {
         label:"Scale Speed [km/h]",
@@ -147,6 +156,25 @@ function initChart(){
         backgroundColor: '#8080C0',
         borderColor: '#8080C0',
         yAxisID: 'y1',
+        showLine: true
+      },
+    //   {
+    //     label:"Scale FW [km/h]",
+    //     borderWidth: 1,
+    //     pointRadius: 2,
+    //     backgroundColor: '#C08080',
+    //     borderColor: '#C08080',
+    //     yAxisID: 'y1',
+    //     showLine: true
+    //   },
+      {
+        label:"Accel [km/h s]",
+        borderWidth: 1,
+        pointRadius: 2,
+        backgroundColor: '#C08080',
+        borderColor: '#C08080',
+        yAxisID: 'y2',
+        showLine: true
       }],
     },
     options: {
@@ -177,14 +205,30 @@ function initChart(){
             display: true,
             position: 'right',
   
-          // grid line settings
-          grid: {
+            // grid line settings
+            grid: {
             drawOnChartArea: false, // only want the grid lines for one axis to show up
-          },
+            },
+        },
+        y2: {
+            title: {
+                display: true,
+                text: 'Scale Accel [km/h s]'
+            },
+            type: 'linear',
+            display: true,
+            position: 'right',
+  
+            // grid line settings
+            grid: {
+            drawOnChartArea: false, // only want the grid lines for one axis to show up
+            },
         }
       }           
     },    
   });
+
+    CanvasJSDataAsCSV(chart, "Track_Data", "buttonCsv");
 }
 
 function startMeasuring(sender)

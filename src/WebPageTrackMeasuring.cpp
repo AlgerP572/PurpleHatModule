@@ -17,7 +17,7 @@ char WebPageTrackMeasuring::_html[] PROGMEM = R"rawliteral(
       integrity="sha512-ElRFoEQdI5Ht6kZvyzXhYG9NqjtkmlkfYk0wr6wHxU9JEHakS7UJZNeml5ALk+8IKlU6jDgMabC3vkumRokgJA=="
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
-    ></script>
+    ></script>    
   <style>
     .topnav { background-color: #800080; }   
     .reading { font-size: 1.4rem; }
@@ -92,17 +92,25 @@ char WebPageTrackMeasuring::_html[] PROGMEM = R"rawliteral(
         <tr>
           <td>Absolute Distance</td>
           <td><span id="absdistance">%absdistance%</span></td>
-          <td>[cm]</td>  
+          <td>[mm]</td>  
         </tr>
         <tr>
           <td>Relative Distance</td>
           <td><span id="reldistance">%reldistance%</span></td>
-          <td>[cm]</td>  
+          <td>[mm]</td>  
+        </tr>
+         <tr>
+          <td>Sampling Rate</td>
+          <td><span id="samplingrate">%samplingrate%</span></td>
+          <td>[Hz]</td>  
         </tr>
       </table></p>
       </div>      
       <div class="card">
+        <div class="tool-bar-graph">
+          <button id="buttonCsv" class="profilebutton">To Csv</button>
           <p class="card-title">Speed Data</p>
+        </div>
           <canvas id="chart-speed-data" width="600" height="400"></canvas>
         </div>
     </div>
@@ -143,7 +151,8 @@ char WebPageTrackMeasuring::_html[] PROGMEM = R"rawliteral(
       </tr>
     </table></p>
   </div>
-  <script src="TrackMeasuringDisplay.js"></script>  
+    <script src="canvasjsascsv.min.js"></script> 
+    <script src="TrackMeasuringDisplay.js"></script>  
 </body>
 </html>)rawliteral";
 

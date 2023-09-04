@@ -5,6 +5,14 @@
 #include "ConfigLoader.h"
 
 IoTT_TrainSensor* PurpleHatModule::_trainSensor = NULL;
+movingAvg PurpleHatModule::_avgDistance(100);
+movingAvg PurpleHatModule::_avgDistanceNoOutliers(100);
+movingAvg PurpleHatModule::_speedData(100);
+movingAvg PurpleHatModule::_scaleSpeedData(200);
+movingAvg PurpleHatModule::_scaleAccelData(200);
+
+LowPass<2> PurpleHatModule::_speedFilter(3, 1e2,true); 
+LowPass<2> PurpleHatModule::_accelFilter(3, 1e2,true); 
 
 void PurpleHatModule::setup()
 {
@@ -16,20 +24,35 @@ void PurpleHatModule::setup()
     Wire.setClock(400000);
     delay(10);
 //        Serial.println(Wire.getClock());
+
+    _avgDistance.begin();
+    _avgDistanceNoOutliers.begin();
+    _speedData.begin();
+    _scaleSpeedData.begin();
+    _scaleAccelData.begin();
     
     DynamicJsonDocument* jsonDataObj = ConfigLoader::getDocPtr(String("/configdata/phcfg.cfg"));
     if (jsonDataObj != NULL)
     {
-         Serial.println("Load Trainside Sensor");
-         _trainSensor = new IoTT_TrainSensor(&Wire, hatSDA, hatSCL);
+        Serial.println("Load Trainside Sensor");
+         _trainSensor = new IoTT_TrainSensor(&Wire,
+            &_avgDistance,
+            &_avgDistanceNoOutliers,
+            &_speedData,
+            &_scaleSpeedData,
+            &_scaleAccelData,
+            &_speedFilter,
+            &_accelFilter,
+            hatSDA,
+            hatSCL);
 //        trainSensor->setTxCallback(sendMsg);
          _trainSensor->loadLNCfgJSON(*jsonDataObj);
-         delete(jsonDataObj); 
-         Serial.println(F("Purple Sensor loaded")); 
+        delete(jsonDataObj); 
+         Serial.println("Purple Sensor loaded"); 
     }
     else
     {
-         Serial.println(F("/configdata/phcfg.cfg not Found.")); 
+        Serial.println("/configdata/phcfg.cfg not Found."); 
     }
 }
 

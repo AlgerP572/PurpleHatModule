@@ -40,6 +40,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "IoTT_CommDef.h"
 #include "IoTT_DigitraxBuffers.h"
 #include "TMAG5273.h"
+#include "movingAvg.h"
+#include "LowPass.h"
 
 //#include <OneDimKalman.h>
 
@@ -58,16 +60,11 @@ extern uint16_t sendMsg(lnTransmitMsg txData);
 #define verBufferSize 48
 #define maxSpeedSteps 128
 #define accel2Steps 500 //start sampling
-#define maxSampleTime 8000000 //sampling complete after micros()
-#define minTestWheelTurns	6 //a successful sampling must last at least x wheel turns
+#define maxSampleTime  8000000 //8000000 //sampling complete after micros()
+#define minTestWheelTurns	6 // 6 //a successful sampling must last at least x wheel turns
 #define crawlTurns 5 //wheel turns per second for crawl speed
 
 #define queBufferSize 50 //messages that can be written in one burst before buffer overflow
-#define measuringInterval 50 //ms 20 samples per second
-#define bufferTime 1000 // ms time span of the average data
-#define fractionLow (measuringInterval * 0.001) / (bufferTime * 0.001)
-#define fractionHigh (1.0 - fractionLow)
-
 
 #define speedTestInterval 200 //ms call test function 5 times per second
 #define magOverflow 360.0
@@ -86,6 +83,8 @@ typedef struct
 {
 	uint32_t timeStamp = millis();
 	float_t currSpeedTech = 0; //[mm/s]
+    float_t currScaleSpeedTech = 0; //[km/h]
+    float_t currScaleAccelTech = 0;   
 	float_t currRadiusTech = 0; //[m]
 	float_t axisAngle = 0; //[deg]
 	float_t absIntegrator = 0; //[m] absolute value, direction independent
@@ -99,7 +98,15 @@ typedef struct
 	float_t posVector_mm[3] = {0,0,0};	//0 dimX 1: dimY 2: dimZ
 //	uint8_t Error = 0;
 	float_t avgMove = 0;
+    float_t avgMoveNoOutliers = 0;
 	float_t avgDir = 0;
+    float_t avgTimeInterval; // Measure the actual measurement rate of the sensor.
+
+    // fields for dynamic buffer
+    float_t measuringInterval = 10.0; //ms 100 samples per second
+    float_t bufferTime = 1000; // ms time span of the average data
+    float_t maxBufferTime = 1000; // maximum buffer time;
+
 }sensorData;
 
 typedef struct
@@ -107,6 +114,7 @@ typedef struct
 	uint8_t testPhase = 0; //0: not started 1: increasing speeds 2: decreasing speeds 3: end test
     uint32_t sampleTime;
 	uint8_t lastSpeedStep = 0;
+    uint8_t startSpeedStep = 0;
 	uint8_t crawlSpeedStep = 1;
 	bool vMaxComplete = false;
 }dirData;
@@ -133,6 +141,14 @@ typedef struct
 	
 	float_t vMaxTest = 300;
 
+    // 0 = test running;
+    // reason for finish
+    // 1 = OK;
+    // 2 = tracklength too short;
+    // 3 = only one V max
+    // 4 user stop
+    uint8_t result = 0; 
+
 	dirData testState[2]; //0: fw 1: bw encoded by upDir
 }testAdminData;
 
@@ -148,7 +164,8 @@ extern std::vector<wsClientInfo> globalClients; // a list to hold all clients wh
 class IoTT_TrainSensor
 {
 public:
-	IoTT_TrainSensor(TwoWire * newWire, uint8_t sda, uint8_t scl);
+	IoTT_TrainSensor(TwoWire* newWire, movingAvg* avgDistance, movingAvg* avgDistanceNoOUtliers, movingAvg* speedData, movingAvg* scaleSpeedData, movingAvg* scaleAccelData,
+                                        LowPass<2>* speedFilter, LowPass<2>* accelFilter, uint8_t sda, uint8_t scl);
 	~IoTT_TrainSensor();
 	void begin();
 	void processSensorLoop(String& sensorData);
@@ -160,8 +177,8 @@ public:
 	void setTxCallback(txFct newCB);
 	void loadLNCfgJSON(DynamicJsonDocument& doc);
 	volatile void sensorTask(void * thisParam);
-	void setRepRate(AsyncWebSocketClient * newClient, int newRate);
-	void reqDCCAddrWatch(AsyncWebSocketClient * newClient, int16_t dccAddr, bool simulOnly);
+	void setRepRate(AsyncWebSocketClient* newClient, int newRate);
+	void reqDCCAddrWatch(AsyncWebSocketClient* newClient, int16_t dccAddr, bool simulOnly);
 	void startTest(float_t trackLen, float_t vMax, uint8_t pMode);
 	void stopTest(String& speedTableData);
 	void sendSpeedCommand(uint8_t newSpeed);
@@ -180,7 +197,17 @@ private:
 	void displayIMUSensorStatus();
 	bool proceedToTrackEnd(bool origin);
 	bool reverseTestDir();
-    TwoWire * sensorWire = NULL;  
+    float getFractionLow(sensorData sensorData);
+    float getFractionHigh(sensorData sensorData);
+    TwoWire* sensorWire = NULL;
+    movingAvg* _avgDistance;
+    movingAvg* _avgDistanceNoOUtliers;
+    movingAvg* _speedData;
+    movingAvg* _scaleSpeedData;
+    movingAvg* _scaleAccelData;
+
+    LowPass<2>* _lpSpeed;
+    LowPass<2>* _lpAccel;
     uint8_t magType = 0; 
     uint8_t imuType = 0;
     float_t wheelDia = 10;

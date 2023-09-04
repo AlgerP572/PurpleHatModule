@@ -36,13 +36,22 @@ void myTask(void * thisParam)
 		thisObj->sensorTask(NULL);
 
 		// feed watch dog
-		delay(2);
+//		delay(2);
 	}
 }
 
-IoTT_TrainSensor::IoTT_TrainSensor(TwoWire * newWire, uint8_t sda, uint8_t scl)
+IoTT_TrainSensor::IoTT_TrainSensor(TwoWire* newWire, movingAvg* avgDistance, movingAvg* avgDistanceNoOUtliers, movingAvg* speedData, movingAvg* scaleSpeedData, movingAvg* scaleAccelData,
+                                                     LowPass<2>* speedFilter,  LowPass<2>* accelFilter, uint8_t sda, uint8_t scl)
 {
 	sensorWire = newWire;
+    _avgDistance = avgDistance;
+    _avgDistanceNoOUtliers = avgDistanceNoOUtliers;
+    _speedData = speedData;
+    _scaleSpeedData = scaleSpeedData;
+    _scaleAccelData = scaleAccelData;
+
+    _lpSpeed = speedFilter;
+    _lpAccel = accelFilter;
 //	sensorWire->begin(sda, scl);
 //	delay(10);
 }
@@ -56,10 +65,10 @@ IoTT_TrainSensor::~IoTT_TrainSensor()
 volatile void IoTT_TrainSensor::sensorTask(void * thisParam)
 {
 	float rotAngle = -1;
-	if ((millis() - lastSampleCtrl) > measuringInterval)
+	if ((millis() - lastSampleCtrl) > workData.measuringInterval)
 	{
 		uint32_t currTime = micros();
-		lastSampleCtrl += measuringInterval;
+		lastSampleCtrl += workData.measuringInterval;
 
 		if (magSensor)
 		{
@@ -93,21 +102,34 @@ volatile void IoTT_TrainSensor::sensorTask(void * thisParam)
 			overFlow = rotAngle > workData.axisAngle ? overFlow = -1 : overFlow = 1;
 			if (overFlow > 0)
 				relMove += (float_t)magOverflow;
-			else
-				relMove -= (float_t)magOverflow;
+		 	else
+		 		relMove -= (float_t)magOverflow;
 		}
 		else
-			relMove = (rotAngle  - workData.axisAngle);
-
+        {
+		 	relMove = (rotAngle  - workData.axisAngle);
+        }
 
 		bool dirFwd = relMove >= 0;
 
-		workData.avgMove = (fractionHigh * workData.avgMove) + (fractionLow * relMove); //used to detect standstill
+		//workData.avgMove = (0.99 * workData.avgMove) + (0.01 * relMove); //used to detect standstill
+        workData.avgMove = _avgDistance->reading(relMove);
 
-		bool isMoving = (abs(workData.avgMove) > 0.25);
+        float stdDev = _avgDistance->getStdDev(_avgDistance->getCount());
+        float zScore = (relMove - workData.avgMove) / stdDev;
+
+        float sigma = 1.0;
+        if(abs(zScore) < sigma)
+        {
+            workData.avgMoveNoOutliers = _avgDistanceNoOUtliers->reading(relMove);
+        }
+       
+		bool isMoving = (abs(workData.avgMove) > 0.2);
 		// if(isMoving)
 		// {
-		// 	Serial.printf("Angle: %.2f RelMove: %.2f Avg: %.2f \n", rotAngle/100, relMove, workData.avgMove);
+		// //  	Serial.printf("Angle: %.2f AxislMove: %.2f RelMove: %.2f \n", rotAngle, workData.axisAngle, relMove);
+        //     if(workData.currSpeedTech > 620 && workData.currSpeedTech < 650)
+        //         Serial.printf("relMove: %.2f AvgMove: %.2f No outliers: %.2f stdDev: %.2f\n", relMove, workData.avgMove, workData.avgMoveNoOutliers, stdDev);
 		// }
 		revCtr += overFlow;     
 		
@@ -119,20 +141,60 @@ volatile void IoTT_TrainSensor::sensorTask(void * thisParam)
 		workData.currDirFwd = dirFwd;
 		workData.axisAngle = rotAngle;
 
+        // How fast is it actually running? i.e is it achieving measurement interval?
+        workData.avgTimeInterval =  (0.99f * workData.avgTimeInterval) + (0.01f * speedDiff);
+
 		//calculate travelled distance
-		linDistance = (float)relMove * wheelDia * PI / 360;
-		avgDistance = workData.avgMove * wheelDia * PI / 360;
+		linDistance = relMove * wheelDia * PI / 360.0f;
+		avgDistance = workData.avgMoveNoOutliers * wheelDia * PI / 360.0f;
 		if (isMoving)
-			workData.currSpeedTech = fractionHigh * workData.currSpeedTech + fractionLow * avgDistance * 1000000 / speedDiff; // time is in µsec
+        {
+            float currentSpeedSample = avgDistance * 1000000.0f / speedDiff;
+            float currentScaleSpeed = currentSpeedSample * 36.0f * workData.modScale / 10000.0f;            
+           
+			//workData.currSpeedTech = getFractionHigh(workData) * workData.currSpeedTech + getFractionLow(workData) * currentSpeedSample; // time is in µsec
+            float xsn = _speedData->reading(currentSpeedSample);
+            float ysn = _lpSpeed->filt(xsn);
+            workData.currSpeedTech = ysn; 
+            //float newScaleTech =   getFractionHigh(workData) * workData.currScaleTech + (getFractionLow(workData) * currentScaleSpeed);
+            float newScaleSeedTech =  _scaleSpeedData->reading(currentScaleSpeed);
+
+            float speedDelta = 1.0;
+            float bufferTimeFactor = -1.330f * speedDelta + 10.0f; // From dynamic buffer xls file.
+            float newBufferTime = (workData.maxBufferTime - 20.0f * workData.measuringInterval)/(1.0f + exp(-bufferTimeFactor)) + (workData.measuringInterval * 20.0f);
+           
+            float scaleAccel = (newScaleSeedTech - workData.currScaleSpeedTech) * 1000000.0f / speedDiff;            
+
+            // updtae current stats.
+            //workData.currScaleAccelTech =  (0.998f *  workData.currScaleAccelTech) + (0.002f * deltaSpeed);
+            float xan =  _scaleAccelData->reading(scaleAccel);
+            float yan = _lpAccel->filt(xan);
+            workData.currScaleAccelTech = yan;
+            //Serial.printf("Scale speed: %.2f Accel: %.2f Buffer : %.2f\n", workData.currScaleSpeedTech, workData.currScaleAccelTech, workData.bufferTime);
+            workData.bufferTime = newBufferTime;
+            workData.currScaleSpeedTech =  newScaleSeedTech;
+        }
 		else
-			workData.currSpeedTech = 0;
+        {
+			workData.currSpeedTech = 0;           
+            workData.currScaleSpeedTech = 0;
+            workData.currScaleAccelTech = 0;
+
+            float x0 = _speedData->reading(0);
+            _lpSpeed->filt(x0);
+            _scaleSpeedData->reading(0);
+            float a0 = _scaleAccelData->reading(0);
+            _lpAccel->filt(0);
+        }
 				
 		lastSpeedTime = currTime;
 		if (isMoving)
+        {
 			if (workData.avgMove > 0)
 				workData.absIntegrator += linDistance;
 			else
 				workData.absIntegrator -= linDistance;
+        }
 		workData.relIntegrator += linDistance;
 
 		//here we know travel distance and speed, so we can now read IMU and calculate vector and position, but only if distance > 0
@@ -210,6 +272,15 @@ volatile void IoTT_TrainSensor::sensorTask(void * thisParam)
 			xSemaphoreGive(sensorSemaphore);
 		}
 	}
+}
+
+float IoTT_TrainSensor::getFractionLow(sensorData sensorData)
+{
+    return  (sensorData.measuringInterval * 0.001f) / (sensorData.bufferTime * 0.001f);
+}
+float IoTT_TrainSensor::getFractionHigh(sensorData sensorData)
+{
+    return (1.f - getFractionLow(sensorData));
 }
 
 void IoTT_TrainSensor::begin() 
@@ -566,7 +637,7 @@ void IoTT_TrainSensor::stopTest(String& speedTableData)
         setRepRate(NULL, 0);
 		sendSpeedCommand(0);
 //		toggleDirCommand();
-		speedSample.adminData.speedTestRunning = false;
+		speedSample.adminData.speedTestRunning = false;       
 		sendSpeedTableDataToWeb(true, speedTableData);
 	}
 }
@@ -591,7 +662,17 @@ bool IoTT_TrainSensor::processTestStep(sensorData * sensStatus)
 	if (speedSample.adminData.validSample)
 	{
 		timeSince = micros() - speedSample.adminData.measureStartTime;
-		if ((timeSince > (uint32_t)maxSampleTime) || (abs(sensStatus->relIntegrator - speedSample.adminData.testStartLinIntegrator) > speedSample.adminData.sampleMinDistance))
+        float distance = abs(sensStatus->relIntegrator - speedSample.adminData.testStartLinIntegrator);
+        Log::print("Time since: ", LogLevel::INFO);
+        Log::print(timeSince, LogLevel::INFO);
+        Log::print(" Max: ", LogLevel::INFO);
+        Log::print(maxSampleTime, LogLevel::INFO);
+        Log::print(" Distance: ", LogLevel::INFO);
+        Log::print(distance, LogLevel::INFO);
+        Log::print(" Max: ", LogLevel::INFO);
+        Log::println(speedSample.adminData.sampleMinDistance, LogLevel::INFO);
+
+		if ((timeSince > (uint32_t)maxSampleTime) || (distance >= speedSample.adminData.sampleMinDistance))
 		{
 //			Serial.println("s cmpl");
 			return true;
@@ -600,6 +681,11 @@ bool IoTT_TrainSensor::processTestStep(sensorData * sensStatus)
 	else
 	{
 		timeSince = millis() - speedSample.adminData.testStartTime;
+
+        Log::print("Time since: ", LogLevel::INFO);
+        Log::print(timeSince, LogLevel::INFO);
+        Log::print(" accel time: ", LogLevel::INFO);
+        Log::println(speedSample.adminData.accelTime, LogLevel::INFO);
 		if (timeSince > speedSample.adminData.accelTime) //(uint32_t)accel2Steps)
 		{
 //			Serial.println("s start");
@@ -607,6 +693,7 @@ bool IoTT_TrainSensor::processTestStep(sensorData * sensStatus)
 			speedSample.adminData.lastLinIntegrator = speedSample.adminData.testStartLinIntegrator;
 			speedSample.adminData.measureStartTime = micros();
 			speedSample.adminData.validSample = true;
+            Log::println("Valid Sample!", LogLevel::INFO);
 		}
 	}
 	return false;
@@ -647,8 +734,17 @@ bool IoTT_TrainSensor::processSpeedTest(String& speedTableData) //returns false 
                 forwardDirCommand();
                 upDirIndex = speedSample.adminData.upDir ? 1 : 0;
                 forwardDir = ((*focusSlot)[3] & 0x20) == 0x20;
+
+               
+                speedSample.adminData.testState[0].startSpeedStep = 0;
+                speedSample.adminData.testState[1].startSpeedStep = 0;
+
+                // Set these for testing to start at a different step.
+                speedSample.adminData.testState[0].lastSpeedStep = 0;
+                speedSample.adminData.testState[1].lastSpeedStep = 0;
                 speedSample.adminData.testRemainingDistanceStartingLinIntegrator = 0;
                 speedSample.adminData.masterPhase = 0;
+                speedSample.adminData.result = 0;
             }
             break;
  			case 0: //proceed with directional test
@@ -682,8 +778,9 @@ bool IoTT_TrainSensor::processSpeedTest(String& speedTableData) //returns false 
  				//if there's room, proceed
                 Log::print("Test phase = ", LogLevel::INFO);
                 Log::print(speedSample.adminData.testState[upDirIndex].testPhase, LogLevel::INFO);
-                 Log::print("  upDirIndex = ", LogLevel::INFO);
+                Log::print("  upDirIndex = ", LogLevel::INFO);
                 Log::println(upDirIndex, LogLevel::INFO);
+
  				switch (speedSample.adminData.testState[upDirIndex].testPhase)
  				{
  					case 0: //set initial speed
@@ -699,7 +796,10 @@ bool IoTT_TrainSensor::processSpeedTest(String& speedTableData) //returns false 
  						}
  						else
  							speedSample.adminData.currSpeedStep = speedSample.adminData.testState[upDirIndex].lastSpeedStep;
- 						speedSample.adminData.accelTime = (uint32_t)accel2Steps + (40 * (speedSample.adminData.currSpeedStep - oldSpeed));
+
+                        // State 4 nd 5 replace this.
+ 						// speedSample.adminData.accelTime = (uint32_t)accel2Steps + (40 * (speedSample.adminData.currSpeedStep - oldSpeed));
+                        speedSample.adminData.accelTime = (uint32_t) accel2Steps;
  						speedSample.adminData.validSample = false;
  						sendSpeedCommand(speedSample.adminData.currSpeedStep); //get started with speed step
  						speedSample.adminData.testStartTime = millis();
@@ -726,18 +826,35 @@ bool IoTT_TrainSensor::processSpeedTest(String& speedTableData) //returns false 
  							}
  							float_t* dataEntry = forwardDir ? &speedSample.fw[speedSample.adminData.currSpeedStep] : &speedSample.bw[speedSample.adminData.currSpeedStep];
  							(*dataEntry) = abs(1000000 * distSince / timeSince);
+
+                            if(speedSample.adminData.currSpeedStep < 126)
+                            {
+                                for(int i = speedSample.adminData.currSpeedStep + 1; i < 128; i++)
+                                {
+                                    if(forwardDir)
+                                    {
+                                        speedSample.fw[i] = (*dataEntry);
+                                    }
+                                    else
+                                    {
+                                        speedSample.bw[i] = (*dataEntry);
+                                    }
+                                }
+                            }
 							
  							Serial.printf("spd: %.2f %.2f %i %i\n", (*dataEntry), speedSample.adminData.crawlSpeedMax, speedSample.adminData.testState[upDirIndex].crawlSpeedStep, speedSample.adminData.currSpeedStep);
  							if (((*dataEntry) < speedSample.adminData.crawlSpeedMax) && (speedSample.adminData.testState[upDirIndex].crawlSpeedStep < speedSample.adminData.currSpeedStep))
  							{
  								speedSample.adminData.testState[upDirIndex].crawlSpeedStep = speedSample.adminData.currSpeedStep;
- 								Serial.printf("set crawl speed %i\n", speedSample.adminData.currSpeedStep);
+ 								Log::print("set crawl speed ", LogLevel::INFO);
+                                Log::println(speedSample.adminData.currSpeedStep, LogLevel::INFO);
  							}
  							speedSample.adminData.testState[upDirIndex].lastSpeedStep = speedSample.adminData.currSpeedStep;
 
  //							if ((speedSample.adminData.currSpeedStep < maxSpeedSteps) && ((*dataEntry) < (1.1 * speedSample.adminData.vMaxTest)))
- 							if ((speedSample.adminData.currSpeedStep < speedSample.adminData.testSteps) && ((*dataEntry) < (1.1 * speedSample.adminData.vMaxTest)))
- 							{
+ 							if ((speedSample.adminData.currSpeedStep < speedSample.adminData.testSteps) &&
+                                ((*dataEntry) < (1.1 * speedSample.adminData.vMaxTest)))
+ 							{                                
  								speedSample.adminData.currSpeedStep++;
  								speedSample.adminData.validSample = false;
  								sendSpeedCommand(speedSample.adminData.currSpeedStep); //set speed step
@@ -769,18 +886,24 @@ bool IoTT_TrainSensor::processSpeedTest(String& speedTableData) //returns false 
  				}
  				else
  					newSpeed = speedSample.adminData.testState[upDirIndex].crawlSpeedStep;
- 				if (newSpeed != speedSample.adminData.currSpeedStep)
- 				{
- 					speedSample.adminData.currSpeedStep = newSpeed;
- 					sendSpeedCommand(speedSample.adminData.currSpeedStep); //set speed step
- 				}
+
+                Log::print("Move to track end ", LogLevel::INFO);
+                Log::print(newSpeed, LogLevel::INFO);
+                Log::print(" to go: ", LogLevel::INFO);
+                Log::println(distFromOrigin, LogLevel::INFO);
+ 				
+				speedSample.adminData.currSpeedStep = newSpeed;
+				sendSpeedCommand(speedSample.adminData.currSpeedStep); //set speed step
+
  				if (newSpeed == 0)
  					speedSample.adminData.masterPhase++;
  			}
  			break;
             case 2: // wait for stop
-                if(cpyData.currSpeedTech > 0.5)
+                if(abs(cpyData.currSpeedTech) > 0.5)
                 {
+
+                    // wait for decel.
                     Log::print("Wait for stop: [mm/s] ", LogLevel::INFO);
                     Log::println(cpyData.currSpeedTech, LogLevel::INFO);
                     return true;
@@ -791,9 +914,37 @@ bool IoTT_TrainSensor::processSpeedTest(String& speedTableData) //returns false 
  			case 3: //slow down and toggle direction
  				toggleDirCommand();
  				if (speedSample.adminData.upDir && speedSample.adminData.testState[0].vMaxComplete && speedSample.adminData.testState[1].vMaxComplete)
+                {
+
+                    // Normal finish.
+                    Log::print("Test completed successfully.", LogLevel::INFO);
+                    speedSample.adminData.result = 1;
  					return false;
+                }
+                if ((speedSample.adminData.upDir && speedSample.adminData.testState[0].vMaxComplete || speedSample.adminData.testState[1].vMaxComplete) &&
+                    (speedSample.adminData.testState[0].lastSpeedStep > 126 && speedSample.adminData.testState[1].lastSpeedStep > 126 ))
+                {
+
+                    // Warning only one direction was able to reach vMax.
+                    Log::print("Only one side completed v Max.", LogLevel::INFO);
+                    speedSample.adminData.result = 2;
+ 					return false;
+                }
+                if(((speedSample.adminData.testState[upDirIndex].lastSpeedStep - speedSample.adminData.testState[upDirIndex].startSpeedStep) < 2) &&
+                    (speedSample.adminData.testState[0].lastSpeedStep < 126 && speedSample.adminData.testState[1].lastSpeedStep < 126 ))
+                {
+
+                    // Not enough track length for speed step measurement.
+                    // Re-run test with longer track length.
+                    Log::print("Tracklength too short.", LogLevel::INFO);
+                    speedSample.adminData.result = 3;
+                    return false;
+                }
  				speedSample.adminData.testStartTime = millis();
-                sendSpeedCommand(speedSample.adminData.testState[upDirIndex].lastSpeedStep);
+
+                // Set speed to previous step 4 waits for accel. 
+                sendSpeedCommand(speedSample.adminData.testState[!upDirIndex].lastSpeedStep);
+                speedSample.adminData.testState[upDirIndex].startSpeedStep = speedSample.adminData.testState[upDirIndex].lastSpeedStep;
  				speedSample.adminData.masterPhase++;
  			break;
             case 4:
@@ -803,11 +954,15 @@ bool IoTT_TrainSensor::processSpeedTest(String& speedTableData) //returns false 
                     float_t distanceSoFarDirection = cpyData.relIntegrator - speedSample.adminData.testRemainingDistanceStartingLinIntegrator;
 
                     if(abs(cpyData.currSpeedTech) < (0.90 * dataEntry) &&
-                        (distanceSoFarDirection < (0.25 * speedSample.adminData.testTrackLen)))
+                        (abs(distanceSoFarDirection) < (0.50 * speedSample.adminData.testTrackLen)))
                     {
-                        Log::print("Wait for accel: [mm/s] ", LogLevel::INFO);
-                        Log::println(cpyData.currSpeedTech, LogLevel::INFO);
-                         Log::println(dataEntry, LogLevel::INFO);
+                        Log::print("Wait for speed: [mm/s] ", LogLevel::INFO);
+                        Log::print(cpyData.currSpeedTech, LogLevel::INFO);
+                        Log::print("accel: [km/h s]", LogLevel::INFO);                        
+                        Log::println(cpyData.currScaleAccelTech, LogLevel::INFO);
+                        Log::print("distance so far: ", LogLevel::INFO);
+                        Log::print("distance so far: ", LogLevel::INFO);
+                        Log::println(distanceSoFarDirection , LogLevel::INFO);
                         return true;
                     }                   
                 }
@@ -854,12 +1009,13 @@ void IoTT_TrainSensor::programmerReturn(uint8_t * programmerSlot)
 
 void IoTT_TrainSensor::sendSpeedTableDataToWeb(bool isFinal, String& speedTableData)
 { 	
-    DynamicJsonDocument doc(4096);
+    DynamicJsonDocument doc(5120);
  	doc["Cmd"] = "SpeedTableData";
 
  	JsonObject Data = doc.createNestedObject("Data");
  	Data["SlotNr"] = digitraxBuffer->getFocusSlotNr();
  	Data["NumSteps"] = speedSample.adminData.testSteps;
+    Data["Result"] = speedSample.adminData.result;
  	
     JsonArray fwArray = Data.createNestedArray("fw");
  	JsonArray bwArray = Data.createNestedArray("bw");
@@ -869,14 +1025,14 @@ void IoTT_TrainSensor::sendSpeedTableDataToWeb(bool isFinal, String& speedTableD
  		Data["final"] = true;
     }
 
- 	for (uint8_t i = 0; i < speedSample.adminData.testSteps; i++)
+ 	for (int i = 0; i <= speedSample.adminData.testSteps; i++)
  	{
  		fwArray.add(speedSample.fw[i]);
  		bwArray.add(speedSample.bw[i]);
  	}
  	serializeJson(doc, speedTableData);
-    Serial.print("Test result: ");
- 	Serial.println(speedTableData.c_str());
+    Log::print("Test result: ", LogLevel::DEBUG);
+ 	Log::println(speedTableData.c_str(), LogLevel::DEBUG);
 }	
 
 void IoTT_TrainSensor::sendSensorDataToWeb(String& data)
@@ -893,6 +1049,9 @@ void IoTT_TrainSensor::sendSensorDataToWeb(String& data)
 	int8_t dirFlag = cpyData.currSpeedTech >= 0 ? 1 : -1;
 	Data["Slope"] = dirFlag * getPercOfAngle(cpyData.imuVal[1]);
 	Data["Banking"] = dirFlag * getPercOfAngle(cpyData.imuVal[0]);
+    Data["SamplingRate"] = cpyData.avgTimeInterval;
+    Data["ScaleSpeed"] = cpyData.currScaleSpeedTech;
+    Data["Accel"] = cpyData.currScaleAccelTech;  
 
 //	Serial.println(cpyData.axisAngle);
 
