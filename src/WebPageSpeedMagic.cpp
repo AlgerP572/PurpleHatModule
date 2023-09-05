@@ -92,7 +92,7 @@ char WebPageSpeedMagic::_html[] PROGMEM = R"rawliteral(
                 <td><span>Length [mm]</span></td>
                 <td><input type="number" min="1" max="50000" value="13500" onchange="setTrackLength(this)"/></td>
                 <td><span>v Max [km/h]</td>
-                <td><input type="number" min="1" max="150" value="50" onchange="setTestSpeed(this)"/></td>
+                <td><input id="vMax" type="number" min="1" max="150" value="50" onchange="setTestSpeed(this)"/></td>
             </tr>        
         <tr>
             <th colspan="3">Data</th>

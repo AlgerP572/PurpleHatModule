@@ -275,7 +275,7 @@ function initProfileChart(){
         x: {
             title: {
                 display: true,
-                text: 'Speed Step [count]'
+                text: 'Throttle Step [count]'
             },
             min: 0,
             max: 128
@@ -492,7 +492,11 @@ function loadThrottleFile(sender)
             var targetSpeed = getSpeedForThrottleStep(i, 127, throttleProfileData, false); // false returns km / h
             profileChart.data.datasets[0].data[i] = { x: i, y: targetSpeed};
         }        
-        profileChart.update();	
+        profileChart.update();
+        
+        console.log(throttleDef);
+        document.getElementById("vMax").value = throttleDef.VMax;
+        maxTestSpeed = throttleDef.VMax;
     };
 
     jsonFile = fileName;
