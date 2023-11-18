@@ -793,8 +793,16 @@ function getMotorValueForSpeed(thisSpeed, avgDataSet, fwDataSet, bwDataSet)
 					else
                     {
 						motorValue[j-1] = Math.round((i * dx) + (((thisSpeed - y1) / dy) * dx));
-                        motorValue[j-1 + 2] = avgDataSet[motorValue[j-1]].y;
-                        motorValue[j-1 + 2] /= j == 1 ? fwDataSet[motorValue[j-1]].y : bwDataSet[motorValue[j-1]].y;
+
+                        if(dy > 2.25) // slope greater than 0.5
+                        {
+                            motorValue[j-1 + 2] = thisSpeed; //avgDataSet[motorValue[j-1]].y;
+                            motorValue[j-1 + 2] /= j == 1 ? fwDataSet[motorValue[j-1]].y : bwDataSet[motorValue[j-1]].y;
+                        }
+                        else
+                        {
+                            motorValue[j-1 + 2] = 0;
+                        }
                     }
 				}
 				else
@@ -806,9 +814,18 @@ function getMotorValueForSpeed(thisSpeed, avgDataSet, fwDataSet, bwDataSet)
                     }
 					else
                     {
-						motorValue[j-1] = thisSpeed > (y1 + (dy / 2)) ? i + 1 : i;
-                        motorValue[j-1 + 2] = avgDataSet[motorValue[j-1]].y;
-                        motorValue[j-1 + 2] /=  j == 1 ? fwDataSet[motorValue[j-1]].y : bwDataSet[motorValue[j-1]].y;
+                        motorValue[j-1] = thisSpeed > (y1 + (dy / 2)) ? i + 1 : i;
+
+                        if(dy > 2.25) // slope greater than 0.5
+                        {						
+                            motorValue[j-1 + 2] = thisSpeed; //avgDataSet[motorValue[j-1]].y;
+                            motorValue[j-1 + 2] /=  j == 1 ? fwDataSet[motorValue[j-1]].y : bwDataSet[motorValue[j-1]].y;
+                        }
+                        else
+                        {
+                            motorValue[j-1 + 2] = 0;
+                        }
+                        
                     }
                 }
 				//times 2 for motor value
