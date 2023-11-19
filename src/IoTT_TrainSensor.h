@@ -104,8 +104,10 @@ typedef struct
 
     // fields for dynamic buffer
     float_t measuringInterval = 10.0; //ms 100 samples per second
-    float_t bufferTime = 1000; // ms time span of the average data
-    float_t maxBufferTime = 1000; // maximum buffer time;
+    // float_t bufferTime = 1000; // ms time span of the average data
+    // float_t maxBufferTime = 1000; // maximum buffer time;
+    float_t bufferTime = 750; // ms time span of the average data
+    float_t maxBufferTime = 750; // maximum buffer time;
 
 }sensorData;
 

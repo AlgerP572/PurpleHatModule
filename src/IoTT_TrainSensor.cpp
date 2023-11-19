@@ -761,7 +761,11 @@ bool IoTT_TrainSensor::processSpeedTest(String& speedTableData) //returns false 
                     (cpyData.relIntegrator < speedSample.adminData.testTrackLen ? remDist : 0) :
                     (cpyData.relIntegrator > 0 ? remDist : 0);
 
- 				float_t brakeDist = sq(cpyData.currSpeedTech) / 300;
+                // Original.
+ 				// float_t brakeDist = sq(cpyData.currSpeedTech) / 300;
+
+                // making this shorter.
+                float_t brakeDist = sq(cpyData.currSpeedTech) / 900;
 
                 Log::print("Remainig Distance: ", LogLevel::INFO);
                 Log::print(remDist, LogLevel::INFO);
@@ -953,8 +957,8 @@ bool IoTT_TrainSensor::processSpeedTest(String& speedTableData) //returns false 
                     float_t dataEntry = forwardDir ? speedSample.fw[speedSample.adminData.testState[upDirIndex].lastSpeedStep] : speedSample.bw[speedSample.adminData.testState[upDirIndex].lastSpeedStep];
                     float_t distanceSoFarDirection = cpyData.relIntegrator - speedSample.adminData.testRemainingDistanceStartingLinIntegrator;
 
-                    if(abs(cpyData.currSpeedTech) < (0.90 * dataEntry) &&
-                        (abs(distanceSoFarDirection) < (0.50 * speedSample.adminData.testTrackLen)))
+                    if(abs(cpyData.currSpeedTech) < (0.80 * dataEntry) &&
+                        (abs(distanceSoFarDirection) < (0.35 * speedSample.adminData.testTrackLen)))
                     {
                         Log::print("Wait for speed: [mm/s] ", LogLevel::INFO);
                         Log::print(cpyData.currSpeedTech, LogLevel::INFO);
