@@ -7,7 +7,7 @@ This was to make flash memory space available for the the over the air FW downlo
 logging.
 
 # Measurements Folder
-This folder contains various measurements I've made for the G-scale engines in the fleet.  The top level folder contains an excel template that documents the various steps for the profiling. i.e. Set high, mid, low speed control, CV29 bit 4, wheel diameter etc.  It also shows an overview of the pre-calibrated, speed table and post calibrated data. An example for the RhB 413 Krocodile is below:
+This folder contains various measurements I've made for the G-scale engines in the fleet.  The roster folder contains an excel template that documents the various steps for the profiling. i.e. Set high, mid, low speed control, CV29 bit 4, wheel diameter etc.  It also shows an overview of the pre-calibrated, speed table and post calibrated data. An example for the RhB 413 Krocodile is below:
 
 ![image](https://github.com/AlgerP572/PurpleHatModule/assets/13104848/8b91f67d-3675-4337-b381-6c1d26ef4cdb)
 
