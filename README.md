@@ -8,18 +8,14 @@ https://github.com/tanner87661/IoTTStick
 In addition many excellent support videos can be found on the IOTT you tube channel:
 
 https://www.youtube.com/c/IoTTCloud
+| | |
+|---|---|
+| [![Layout GPS (Video#82)](https://img.youtube.com/vi/xracbWHlD6M&t=236s/0.jpg)](https://www.youtube.com/watch?v=xracbWHlD6M&t=236s) | [![DIY Track Measuring Car Test (Video#88)](https://img.youtube.com/vi/YqyiDbs_tls/0.jpg)](https://www.youtube.com/watch?v=YqyiDbs_tls) |
+| [![Speed Matching Re-Invented (Video#90)](https://img.youtube.com/vi/0ds42XWqe9w&t=463s/0.jpg)](https://www.youtube.com/watch?v=0ds42XWqe9w&t=463s) | [![One Minute Speed Profiling (Video#91)](https://img.youtube.com/vi/u_VjYLT28Q0&t=207s/0.jpg)](https://www.youtube.com/watch?v=u_VjYLT28Q0&t=207s) |
+| [![Build your own PurpleHat Sensor (Video#93)](https://img.youtube.com/vi/XExpASPmUMI/0.jpg)](https://www.youtube.com/watch?v=XExpASPmUMI) | [![Speed Profiling Step by Step Tutorial (Video#94)](https://img.youtube.com/vi/-WRvbC5DXH4&t=1095s/0.jpg)](https://www.youtube.com/watch?v=-WRvbC5DXH4&t=1095s) |
+| [![Speed Profiling Station with Arduino / DCC EX (Video#116)](https://img.youtube.com/vi/pA4SSrq9UFE/0.jpg)](https://www.youtube.com/watch?v=pA4SSrq9UFE) | [![PurpleHat Tips, Tricks, and Apps (Video#96)](https://img.youtube.com/vi/b0Au8o2HQeM&t=313s/0.jpg)](https://www.youtube.com/watch?v=b0Au8o2HQeM&t=313s) |
+| [![PurpleHat Tips, Tricks and new Features (Video#122)](https://img.youtube.com/vi/KTQQpCsVA8E&t=46s/0.jpg)](https://www.youtube.com/watch?v=KTQQpCsVA8E&t=46s) | |
 
-```
-Layout GPS (Video#82) https://www.youtube.com/watch?v=xracbWHlD6M&t=236s
-DIY Track Measuring Car Test (Video#88) https://www.youtube.com/watch?v=YqyiDbs_tls
-Speed Matching Re-Invented (Video#90) https://www.youtube.com/watch?v=0ds42XWqe9w&t=463s
-One Minute Speed Profiling (Video#91) https://www.youtube.com/watch?v=u_VjYLT28Q0&t=207s
-Build your own PurpleHat Sensor (Video#93) https://www.youtube.com/watch?v=XExpASPmUMI
-Speed Profiling Step by Step Tutorial (Video#94) https://www.youtube.com/watch?v=-WRvbC5DXH4&t=1095s
-PurpleHat Tips, Tricks, and Apps (Video#96) https://www.youtube.com/watch?v=pA4SSrq9UFE
-Speed Profiling Station with Arduino / DCC EX (Video#116) https://www.youtube.com/watch?v=b0Au8o2HQeM&t=313s
-PurpleHat Tips, Tricks and new Features (Video#122) https://www.youtube.com/watch?v=KTQQpCsVA8E&t=46s 
-```
 
 This github repository comprises a derivative work from Hans Tanner's Purple hat IOTT stick SW.  The
 derivative software supports over the air (OTA) firmware (FW) download and OTA logging. Adding the
@@ -30,9 +26,11 @@ the M5 from the battery.
 
 ![image](https://github.com/AlgerP572/PurpleHatModule/assets/13104848/e121b220-d1f1-422f-9402-e60637b5293a)
 
+```
 Note: This is Purple hat only other hats have been removed and only a subset of the features are supprted.
 This was to make flash memory space available for the the over the air FW download and over the air debug
 logging.
+```
 
 # Building / Compiling PurpleHatModule
 The purple hat module code has been converted to a platform.io project hosted by microsoft visual studio code.
