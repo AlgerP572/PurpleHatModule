@@ -35,8 +35,8 @@ logging.
 
 # Building / Compiling PurpleHatModule
 The purple hat module code has been converted to a platform.io project hosted by microsoft visual studio code.
-Both the IDE and platformIO are free to use.  The main motivation for this change was to supoprt incremental
-build support which leads to build / compile times on average of less than 40 seconds.  The repo has the required
+Both the IDE and platformIO are free to use.  The main motivation for this change was to support incremental
+builds which lead to build / compile times on average of less than 40 seconds.  The repo has the required
 launch file in the .vscode folder in the src tree.
 
 ![image](https://github.com/AlgerP572/PurpleHatModule/assets/13104848/58a90ea3-a99b-4240-99ad-5c8c3da7cb37)
