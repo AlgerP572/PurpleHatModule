@@ -9,19 +9,23 @@ In addition many excellent support videos can be found on the IOTT you tube chan
 
 https://www.youtube.com/c/IoTTCloud
 
-<a href="http://www.youtube.com/watch?feature=player_embedded&v=xracbWHlD6M&t=239s" target="_blank"><img src="http://i.ytimg.com/vi/xracbWHlD6M&t=239s/0.jpg" alt="[Layout GPS (Video#82)" width="240" height="180" border="10" /></a>
+<a href="http://www.youtube.com/watch?feature=player_embedded&v=xracbWHlD6M&t=239s" target="_blank"><img src="http://i.ytimg.com/vi/xracbWHlD6M&t=239s/0.jpg" alt="Layout GPS (Video#82)" width="240" height="180" border="10" /></a>
 
 <a href="http://www.youtube.com/watch?feature=player_embedded&v=YqyiDbs_tls" target="_blank"><img src="http://i.ytimg.com/vi/YqyiDbs_tls/0.jpg" alt="DIY Track Measuring Car Test (Video#88)" width="240" height="180" border="10" /></a>
 
+<a href="http://www.youtube.com/watch?feature=player_embedded&0ds42XWqe9w&t=463s" target="_blank"><img src="http://i.ytimg.com/vi/0ds42XWqe9w&t=463s/0.jpg" alt="Speed Matching Re-Invented (Video#90)" width="240" height="180" border="10" /></a>
 
-| | |
-|---|---|
-| [!](https://img.youtube.com/vi/xracbWHlD6M&t=239s/1.jpg)](https://www.youtube.com/watch?v=xracbWHlD6M&t=239s) | [![](https://img.youtube.com/vi/YqyiDbs_tls/1.jpg)](https://www.youtube.com/watch?v=YqyiDbs_tls) |
-| [![Speed Matching Re-Invented (Video#90)](https://img.youtube.com/vi/0ds42XWqe9w&t=463s/1.jpg)](https://www.youtube.com/watch?v=0ds42XWqe9w&t=463s) | [![One Minute Speed Profiling (Video#91)](https://img.youtube.com/vi/u_VjYLT28Q0&t=207s/1.jpg)](https://www.youtube.com/watch?v=u_VjYLT28Q0&t=207s) |
-| [![Build your own PurpleHat Sensor (Video#93)](https://img.youtube.com/vi/XExpASPmUMI/1.jpg)](https://www.youtube.com/watch?v=XExpASPmUMI) | [![Speed Profiling Step by Step Tutorial (Video#94)](https://img.youtube.com/vi/-WRvbC5DXH4&t=1095s/1.jpg)](https://www.youtube.com/watch?v=-WRvbC5DXH4&t=1095s) |
-| [![Speed Profiling Station with Arduino / DCC EX (Video#116)](https://img.youtube.com/vi/pA4SSrq9UFE/1.jpg)](https://www.youtube.com/watch?v=pA4SSrq9UFE) | [![PurpleHat Tips, Tricks, and Apps (Video#96)](https://img.youtube.com/vi/b0Au8o2HQeM&t=313s/1.jpg)](https://www.youtube.com/watch?v=b0Au8o2HQeM&t=313s) |
-| [![PurpleHat Tips, Tricks and new Features (Video#122)](https://img.youtube.com/vi/KTQQpCsVA8E&t=46s/1.jpg)](https://www.youtube.com/watch?v=KTQQpCsVA8E&t=46s) | |
+<a href="http://www.youtube.com/watch?feature=player_embedded&u_VjYLT28Q0&t=207s" target="_blank"><img src="http://i.ytimg.com/vi/u_VjYLT28Q0&t=207s/0.jpg" alt="One Minute Speed Profiling (Video#91)" width="240" height="180" border="10" /></a>
 
+<a href="http://www.youtube.com/watch?feature=player_embedded&XExpASPmUMI" target="_blank"><img src="http://i.ytimg.com/vi/XExpASPmUMI/0.jpg" alt="Build your own PurpleHat Sensor (Video#93)" width="240" height="180" border="10" /></a>
+
+<a href="http://www.youtube.com/watch?feature=player_embedded&-WRvbC5DXH4&t=1095s" target="_blank"><img src="http://i.ytimg.com/vi/-WRvbC5DXH4&t=1095s/0.jpg" alt="Speed Profiling Step by Step Tutorial (Video#94)" width="240" height="180" border="10" /></a>
+
+<a href="http://www.youtube.com/watch?feature=player_embedded&b0Au8o2HQeM&t=313s" target="_blank"><img src="http://i.ytimg.com/vi/b0Au8o2HQeM&t=313s/0.jpg" alt="PurpleHat Tips, Tricks, and Apps (Video#96)" width="240" height="180" border="10" /></a>
+
+<a href="http://www.youtube.com/watch?feature=player_embedded&pA4SSrq9UFE" target="_blank"><img src="http://i.ytimg.com/vi/pA4SSrq9UFE/0.jpg" alt="Speed Profiling Station with Arduino / DCC EX (Video#116)" width="240" height="180" border="10" /></a>
+
+<a href="http://www.youtube.com/watch?feature=player_embedded&KTQQpCsVA8E&t=46s" target="_blank"><img src="http://i.ytimg.com/vi/KTQQpCsVA8E&t=46s/0.jpg" alt="PurpleHat Tips, Tricks and new Features (Video#122)" width="240" height="180" border="10" /></a>
 
 This github repository comprises a derivative work from Hans Tanner's Purple hat IOTT stick SW.  The
 derivative software supports over the air (OTA) firmware (FW) download and OTA logging. Adding the
