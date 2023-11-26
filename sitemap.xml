@@ -1,0 +1,347 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset
+      xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+            http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+<!-- created with Free Online Sitemap Generator www.xml-sitemaps.com -->
+
+
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule/issues</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule/pulls</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule/actions</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule/projects?query=is%3Aopen</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule/security</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule/commit/9b862339351e51ee91ef1f8659e98ea4af5ec08e</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule/releases</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule/labels</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule/milestones</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule/compare</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule/commit/705aede7a1e43f86bd6f7867d2a1d2fff93631cd</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule/labels?sort=name-asc</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule/labels?sort=name-desc</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule/labels?sort=count-desc</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule/labels?sort=count-asc</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule/labels/bug</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule/labels/documentation</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule/labels/duplicate</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule/labels/enhancement</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule/labels/good%20first%20issue</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule/labels/help%20wanted</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule/labels/invalid</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule/labels/question</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule/labels/wontfix</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule/milestones?state=open</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule/milestones?state=closed</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule/milestones?direction=desc&amp;sort=due_date&amp;state=open</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule/milestones?direction=asc&amp;sort=due_date&amp;state=open</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule/milestones?direction=asc&amp;sort=completeness&amp;state=open</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule/milestones?direction=desc&amp;sort=completeness&amp;state=open</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule/milestones?direction=asc&amp;sort=title&amp;state=open</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule/milestones?direction=desc&amp;sort=title&amp;state=open</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule/milestones?direction=desc&amp;sort=count&amp;state=open</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule/milestones?direction=asc&amp;sort=count&amp;state=open</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule/commit/4968cfba5e25e010f80a9e9c0ba769aaf388d05d</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule/milestones?direction=desc&amp;sort=due_date&amp;state=closed</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule/milestones?direction=asc&amp;sort=due_date&amp;state=closed</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule/milestones?direction=asc&amp;sort=completeness&amp;state=closed</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule/milestones?direction=desc&amp;sort=completeness&amp;state=closed</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule/milestones?direction=asc&amp;sort=title&amp;state=closed</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule/milestones?direction=desc&amp;sort=title&amp;state=closed</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule/milestones?direction=desc&amp;sort=count&amp;state=closed</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule/milestones?direction=asc&amp;sort=count&amp;state=closed</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule/commit/7ab85f37d8de9dc4779b12dac8e328d149092e84</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>0.41</priority>
+</url>
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule/commit/15e9010b5f5ab53a898334a7a5fe3e7edd9e5b7f</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>0.33</priority>
+</url>
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule/commit/2d3db5cbb23beb1c3563ea70187aded2e7afdcab</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>0.26</priority>
+</url>
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule/commit/ed0687675ecd184f955b2450f14bc20bff2ae309</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>0.21</priority>
+</url>
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule/commit/99d6e2eb302b60fe324db89fa90b8e70a06604f3</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>0.21</priority>
+</url>
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule/commit/0fedeb72d7909f34b5fc79d074854e42be11742c</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>0.17</priority>
+</url>
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule/commit/943faacc3e9f6e8a6dd6422263c18734ffc257e9</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>0.17</priority>
+</url>
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule/commit/553fb800fc499aa695806271f9832e3cedfc4ac3</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>0.13</priority>
+</url>
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule/commit/7995202a6e8bffd69fc733181ee2516775ca948b</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>0.11</priority>
+</url>
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule/commit/48a4dad2022b5c84dc4e19d53f5153410b8b98ab</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>0.09</priority>
+</url>
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule/commit/1e526973ba07bf9a03f132cda8d6eeb3bec7e4bc</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>0.07</priority>
+</url>
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule/commit/81fef0d5c99c372d739d72ac84bab9fbc978bdea</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>0.05</priority>
+</url>
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule/commit/2552c6c86e432f6980d09c2d30b2bd8c50e46d72</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>0.04</priority>
+</url>
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule/commit/9f8381d2d078b28bd7754ce909ba5e217c63bd9d</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>0.04</priority>
+</url>
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule/commit/78c6b3a98a41614e3b68b3ba1a099904c0afd6a1</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>0.03</priority>
+</url>
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule/commit/02e6481e46c45a35f84ce606d14a61c5ec868b1f</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>0.02</priority>
+</url>
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule/commit/7fe7c8e170e3858ff7650039cf2705c6c494ebdb</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>0.02</priority>
+</url>
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule/commit/c8e8579922315cfdf56ef86113343f4aca7d8679</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>0.01</priority>
+</url>
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule/commit/d4ca80538611c231dc29a3ab9d0167dccc10c22b</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>0.01</priority>
+</url>
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule/commit/e970b2bdc43d914025b9befcce604a07f58b4827</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>0.01</priority>
+</url>
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule/commit/ca42c2c61d038b1944bd120d8fa69b014a4b8632</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>0.01</priority>
+</url>
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule/commit/4345ae89ea3b9053d79a9d75d4854d8643266db8</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>0.01</priority>
+</url>
+<url>
+  <loc>https://github.com/AlgerP572/PurpleHatModule/commit/6685f40e2faec8abaf47272ecd528d1772670012</loc>
+  <lastmod>2023-11-26T18:02:45+00:00</lastmod>
+  <priority>0.00</priority>
+</url>
+
+
+</urlset>
