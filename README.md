@@ -22,10 +22,11 @@ PurpleHat Tips, Tricks and new Features (Video#122) https://www.youtube.com/watc
 ```
 
 This github repository comprises a derivative work from Hans Tanner's Purple hat IOTT stick SW.  The
-software supports over the air (OTA) firmware (FW) download and OTA logging. Adding the ability to download
-FW over the air wirelessely allows the M5 stick to be updated in place on the layout without a COM port 
-connection.  This is a nice feature since the battery I use to run the M5 stick does not allow for COM port
-access. With OTS FW dowload I can also update the M5 FW without having to remove the M5 from the battery.
+derivative software supports over the air (OTA) firmware (FW) download and OTA logging. Adding the
+ability to download FW over the air wirelessely allows the M5 stick to be updated in place on the layout
+without a COM port connection.  This is a nice feature since the battery I use to run the M5 stick does
+not allow for COM port access. With OTS FW dowload I can also update the M5 FW without having to remove
+the M5 from the battery.
 
 ![image](https://github.com/AlgerP572/PurpleHatModule/assets/13104848/e121b220-d1f1-422f-9402-e60637b5293a)
 
