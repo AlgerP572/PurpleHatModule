@@ -11,7 +11,7 @@ https://www.youtube.com/c/IoTTCloud
 
 | | |
 |---|---|
-| [![Layout GPS (Video#82)](https://img.youtube.com/vi/xracbWHlD6M&t=236s/1.jpg)](https://www.youtube.com/watch?v=xracbWHlD6M&t=236s) | [![DIY Track Measuring Car Test (Video#88)](https://img.youtube.com/vi/YqyiDbs_tls/1.jpg)](https://www.youtube.com/watch?v=YqyiDbs_tls) |
+| [![Layout GPS (Video#82)](https://img.youtube.com/vi/xracbWHlD6M&t=239s/1.jpg)](https://www.youtube.com/watch?v=xracbWHlD6M&t=239s) | [![DIY Track Measuring Car Test (Video#88)](https://img.youtube.com/vi/YqyiDbs_tls/1.jpg)](https://www.youtube.com/watch?v=YqyiDbs_tls) |
 | [![Speed Matching Re-Invented (Video#90)](https://img.youtube.com/vi/0ds42XWqe9w&t=463s/1.jpg)](https://www.youtube.com/watch?v=0ds42XWqe9w&t=463s) | [![One Minute Speed Profiling (Video#91)](https://img.youtube.com/vi/u_VjYLT28Q0&t=207s/1.jpg)](https://www.youtube.com/watch?v=u_VjYLT28Q0&t=207s) |
 | [![Build your own PurpleHat Sensor (Video#93)](https://img.youtube.com/vi/XExpASPmUMI/1.jpg)](https://www.youtube.com/watch?v=XExpASPmUMI) | [![Speed Profiling Step by Step Tutorial (Video#94)](https://img.youtube.com/vi/-WRvbC5DXH4&t=1095s/1.jpg)](https://www.youtube.com/watch?v=-WRvbC5DXH4&t=1095s) |
 | [![Speed Profiling Station with Arduino / DCC EX (Video#116)](https://img.youtube.com/vi/pA4SSrq9UFE/1.jpg)](https://www.youtube.com/watch?v=pA4SSrq9UFE) | [![PurpleHat Tips, Tricks, and Apps (Video#96)](https://img.youtube.com/vi/b0Au8o2HQeM&t=313s/1.jpg)](https://www.youtube.com/watch?v=b0Au8o2HQeM&t=313s) |
