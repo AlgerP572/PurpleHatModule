@@ -1,4 +1,4 @@
-# PurpleHatModule
+# PurpleHat- Background
 Purple hat is a hardware platform by Hans Tanner used to automate speed profiling for Digital Command
 Control (DCC) equipped model railroad locomotives.  Both the hardware design and provided software are
 open source and can by found on the IOTT stick git hub repository:
@@ -19,6 +19,7 @@ and many more concerning all apsects of using new technology with the model rail
 | <a href="https://youtu.be/-WRvbC5DXH4?si=BaNzjVfViuEvEctT" target="_blank"><img src="https://github.com/AlgerP572/PurpleHatModule/assets/13104848/2c2a8e60-8bcd-4e9d-89ae-403a8159313f" alt="Speed Profiling Step by Step Tutorial (Video#94)" width="320" height="180" border="10" /></a> | <a href="https://youtu.be/pA4SSrq9UFE?si=hkQaUZnqgn0DI3pb" target="_blank"><img src="https://github.com/AlgerP572/PurpleHatModule/assets/13104848/b8fb7a6f-96c6-4692-b217-a915872edf3a" alt="PurpleHat Tips, Tricks, and Apps (Video#96)" width="320" height="180" border="10" /></a> | <a href="https://youtu.be/b0Au8o2HQeM?si=5GhcrTF3LrSURjIQ" target="_blank"><img src="https://github.com/AlgerP572/PurpleHatModule/assets/13104848/4f079739-6052-4d88-bcbb-1622c72744a4" alt="Speed Profiling Station with Arduino / DCC EX (Video#116)" width="320" height="180" border="10" /></a> |
 | <a href="https://youtu.be/KTQQpCsVA8E?si=uP8bcGdStDltAaaL" target="_blank"><img src="https://github.com/AlgerP572/PurpleHatModule/assets/13104848/d8625f87-196a-451a-9b2c-4198fdf44754" alt="PurpleHat Tips, Tricks and new Features (Video#122)" width="320" height="180" border="10" /></a> | <a href="https://youtu.be/s9Wfw1m8l4A?si=cJCRfqefYz01u9v1" target="_blank"><img src="https://github.com/AlgerP572/PurpleHatModule/assets/13104848/41a891ef-07f1-4ca6-88f5-3d626e38f1e2" alt="Closing the Loop - More New PurpleHat Features (Video#123)" width="320" height="180" border="10" /> | <a href="https://youtu.be/hhmCFm9BiHA?si=9rewAfW110-CZBXg" target="_blank"><img src="https://github.com/AlgerP572/PurpleHatModule/assets/13104848/1bad9f66-5e39-4925-a38d-a055d42cf9f7" alt="Make it tiny: PurpleHat Mini (Video#131)" width="320" height="180" border="10" /> |
 
+# PurpleHatModule
 This github repository comprises a derivative work from Hans Tanner's Purple hat IOTT stick SW.  The
 derivative software supports over the air (OTA) firmware (FW) download and OTA logging. Adding the
 ability to download FW over the air wirelessely allows the M5 stick to be updated in place on the layout
