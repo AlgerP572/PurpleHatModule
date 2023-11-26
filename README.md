@@ -9,6 +9,9 @@ In addition many excellent support videos can be found on the IOTT you tube chan
 
 https://www.youtube.com/c/IoTTCloud
 
+Here are just a few that highlight the development of the purple hat, but check out the channel for these
+and many more concerning all apsects of using new technology with the model railroading hobby.
+
 | | | |
 |---|---|---|
 | <a href="http://www.youtube.com/watch?feature=player_embedded&v=xracbWHlD6M&t=239s" target="_blank"><img src="https://github.com/AlgerP572/PurpleHatModule/assets/13104848/ec230ff4-95a0-45e8-ab12-ac9d04c1f59f" alt="Layout GPS (Video#82)" width="320" height="180" border="10" /></a> | <a href="https://youtu.be/01YRP97fmiU?si=FaMYlQxXjFY6Y-N6" target="_blank"><img src="https://github.com/AlgerP572/PurpleHatModule/assets/13104848/31066416-17c1-4765-8b51-a5a25231c5cd" alt="DIY Track Measuring Car for HO and N Scale (Video#87)" width="320" height="180" border="10" /></a> | <a href="http://www.youtube.com/watch?feature=player_embedded&v=YqyiDbs_tls" target="_blank"><img src="https://github.com/AlgerP572/PurpleHatModule/assets/13104848/f9342e0e-6e41-4b3d-84a3-e844e1e330d2" alt="DIY Track Measuring Car Test (Video#88)" width="320" height="180" border="10" /></a> |
