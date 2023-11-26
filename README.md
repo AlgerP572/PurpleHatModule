@@ -9,9 +9,14 @@ In addition many excellent support videos can be found on the IOTT you tube chan
 
 https://www.youtube.com/c/IoTTCloud
 
+<a href="http://www.youtube.com/watch?feature=player_embedded&v=xracbWHlD6M&t=239s" target="_blank"><img src="http://i.ytimg.com/vi/xracbWHlD6M&t=239s/0.jpg" alt="[Layout GPS (Video#82)" width="240" height="180" border="10" /></a>
+
+<a href="http://www.youtube.com/watch?feature=player_embedded&v=YqyiDbs_tls" target="_blank"><img src="http://i.ytimg.com/vi/YqyiDbs_tls/0.jpg" alt="DIY Track Measuring Car Test (Video#88)" width="240" height="180" border="10" /></a>
+
+
 | | |
 |---|---|
-| [![Layout GPS (Video#82)](https://img.youtube.com/vi/xracbWHlD6M&t=239s/1.jpg)](https://www.youtube.com/watch?v=xracbWHlD6M&t=239s) | [![DIY Track Measuring Car Test (Video#88)](https://img.youtube.com/vi/YqyiDbs_tls/1.jpg)](https://www.youtube.com/watch?v=YqyiDbs_tls) |
+| [!](https://img.youtube.com/vi/xracbWHlD6M&t=239s/1.jpg)](https://www.youtube.com/watch?v=xracbWHlD6M&t=239s) | [![](https://img.youtube.com/vi/YqyiDbs_tls/1.jpg)](https://www.youtube.com/watch?v=YqyiDbs_tls) |
 | [![Speed Matching Re-Invented (Video#90)](https://img.youtube.com/vi/0ds42XWqe9w&t=463s/1.jpg)](https://www.youtube.com/watch?v=0ds42XWqe9w&t=463s) | [![One Minute Speed Profiling (Video#91)](https://img.youtube.com/vi/u_VjYLT28Q0&t=207s/1.jpg)](https://www.youtube.com/watch?v=u_VjYLT28Q0&t=207s) |
 | [![Build your own PurpleHat Sensor (Video#93)](https://img.youtube.com/vi/XExpASPmUMI/1.jpg)](https://www.youtube.com/watch?v=XExpASPmUMI) | [![Speed Profiling Step by Step Tutorial (Video#94)](https://img.youtube.com/vi/-WRvbC5DXH4&t=1095s/1.jpg)](https://www.youtube.com/watch?v=-WRvbC5DXH4&t=1095s) |
 | [![Speed Profiling Station with Arduino / DCC EX (Video#116)](https://img.youtube.com/vi/pA4SSrq9UFE/1.jpg)](https://www.youtube.com/watch?v=pA4SSrq9UFE) | [![PurpleHat Tips, Tricks, and Apps (Video#96)](https://img.youtube.com/vi/b0Au8o2HQeM&t=313s/1.jpg)](https://www.youtube.com/watch?v=b0Au8o2HQeM&t=313s) |
