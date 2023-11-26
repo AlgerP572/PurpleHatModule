@@ -1,6 +1,21 @@
 # PurpleHatModule
-A derivative work from Hans Tanner's Purple hat IOTT stick SW.  Supports OTA FW download and OTA logging.
-Added ability to download FW over the air wirelessely so it can be updated in place on the layout.
+Purple hat is a hardware platform by Hans Tanner used to automate speed profiling for Digital Command
+Control (DCC) equipped model railroad locomotives.  Both the hardware design and provided software are
+open source and can by found on the IOTT stick git hub repository:
+
+https://github.com/tanner87661/IoTTStick
+
+In addition many excellent support videos can be found on the IOTT you tube channel:
+
+https://www.youtube.com/c/IoTTCloud 
+
+This github repository comprises a derivative work from Hans Tanner's Purple hat IOTT stick SW.  The
+software supports over the air (OTA) firmware (FW) download and OTA logging. Adding the ability to download
+FW over the air wirelessely allows the M5 stick to be updated in place on the layout with a COM port 
+connection.  This is a nice feature since the battery I use to run the M5 stick does not allow for COM port
+access. With OTS FW dowload I can also update the M5 FW without having to remove the M5 from the battery.
+
+![image](https://github.com/AlgerP572/PurpleHatModule/assets/13104848/e121b220-d1f1-422f-9402-e60637b5293a)
 
 Note: This is Purple hat only other hats have been removed and only a subset of the features are supprted.
 This was to make flash memory space available for the the over the air FW download and over the air debug
@@ -9,7 +24,7 @@ logging.
 # Building / Compiling PurpleHatModule
 The purple hat module code has been converted to a platform.io project hosted by microsoft visual studio code.
 Both the IDE and platformIO are free to use.  The main motivation for this change was to supoprt incremental
-build support which leads to build / compile times onm average of less than 40 seconds.  The repo has the required
+build support which leads to build / compile times on average of less than 40 seconds.  The repo has the required
 launch file in the .vscode folder in the src tree.
 
 ![image](https://github.com/AlgerP572/PurpleHatModule/assets/13104848/58a90ea3-a99b-4240-99ad-5c8c3da7cb37)
