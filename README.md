@@ -7,11 +7,23 @@ https://github.com/tanner87661/IoTTStick
 
 In addition many excellent support videos can be found on the IOTT you tube channel:
 
-https://www.youtube.com/c/IoTTCloud 
+https://www.youtube.com/c/IoTTCloud
+
+```
+Layout GPS (Video#82) https://www.youtube.com/watch?v=xracbWHlD6M&t=236s
+DIY Track Measuring Car Test (Video#88) https://www.youtube.com/watch?v=YqyiDbs_tls
+Speed Matching Re-Invented (Video#90) https://www.youtube.com/watch?v=0ds42XWqe9w&t=463s
+One Minute Speed Profiling (Video#91) https://www.youtube.com/watch?v=u_VjYLT28Q0&t=207s
+Build your own PurpleHat Sensor (Video#93) https://www.youtube.com/watch?v=XExpASPmUMI
+Speed Profiling Step by Step Tutorial (Video#94) https://www.youtube.com/watch?v=-WRvbC5DXH4&t=1095s
+PurpleHat Tips, Tricks, and Apps (Video#96) https://www.youtube.com/watch?v=pA4SSrq9UFE
+Speed Profiling Station with Arduino / DCC EX (Video#116) https://www.youtube.com/watch?v=b0Au8o2HQeM&t=313s
+PurpleHat Tips, Tricks and new Features (Video#122) https://www.youtube.com/watch?v=KTQQpCsVA8E&t=46s 
+```
 
 This github repository comprises a derivative work from Hans Tanner's Purple hat IOTT stick SW.  The
 software supports over the air (OTA) firmware (FW) download and OTA logging. Adding the ability to download
-FW over the air wirelessely allows the M5 stick to be updated in place on the layout with a COM port 
+FW over the air wirelessely allows the M5 stick to be updated in place on the layout without a COM port 
 connection.  This is a nice feature since the battery I use to run the M5 stick does not allow for COM port
 access. With OTS FW dowload I can also update the M5 FW without having to remove the M5 from the battery.
 
