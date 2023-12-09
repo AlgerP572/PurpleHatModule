@@ -963,8 +963,7 @@ bool IoTT_TrainSensor::processSpeedTest(String& speedTableData) //returns false 
                         Log::print("Wait for speed: [mm/s] ", LogLevel::INFO);
                         Log::print(cpyData.currSpeedTech, LogLevel::INFO);
                         Log::print("accel: [km/h s]", LogLevel::INFO);                        
-                        Log::println(cpyData.currScaleAccelTech, LogLevel::INFO);
-                        Log::print("distance so far: ", LogLevel::INFO);
+                        Log::println(cpyData.currScaleAccelTech, LogLevel::INFO);                       
                         Log::print("distance so far: ", LogLevel::INFO);
                         Log::println(distanceSoFarDirection , LogLevel::INFO);
                         return true;
