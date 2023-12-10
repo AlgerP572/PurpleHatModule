@@ -128,8 +128,8 @@ this process I discovered that the speed magic test perfoms best with G scale wi
 the shortest distance I use is 13500 mm.  Ocassionally, I found with distances that were too short that the
 test was not able to measure a single speed step and it could get into an infinite loop since the step counter
 was not effectively incrementing.  To fix this a feauture was added to the test where it now requires a minumum
-of two speed steps to be completed in a single speed magic pass.  If two speed steps are not completed in a
-given test test cycle, the stops width a warning that the track length may be too short.
+of at least two speed steps to be completed in a single speed magic pass.  If the minimum two speed steps are
+not completed in a given test test cycle, the stops width a warning that the track length may be too short.
 
 ![image](https://github.com/AlgerP572/PurpleHatModule/assets/13104848/e785ec78-c405-4abf-95d8-40059400ea7e)
 
