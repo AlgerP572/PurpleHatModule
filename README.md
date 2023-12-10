@@ -81,19 +81,24 @@ build_type = debug
 monitor_filters = esp32_exception_decoder
 ```
 # Added Features
-The purple hat modulule SW also has a limited number of addition features not found in the original purple
-hat IOTT version.  These features are geared toward G-scale modellers but they may also be useful for other
-scales as well.  If there is interest in these features, let me know and perhaps I can ask Hans about
-including one or more of them into the main IOTT repository.
+The purple hat modulule SW introduces several additional features not present in the original purple
+hat IOTT version.  These features are designed with G-scale modellers in mind, and help to ease the
+process of the speed magic test. While tailored for G-scale, the new features may also prove valuable
+for enthusiasts in other scales. If there is interest in these features, let me know and perhaps I
+can ask Hans Tanner about including one or more of them into the main IOTT repository.
 
 ## Force Forward At Speed Magic Test Start.
-The first feature was not specific to a scale but rather the setup used to run purple hat and the IOTT stick.
-I had found that when aligning the engine to the test starting position from the reverse direction that the
-engine would move backwards rather than forwards for the first leg of the speed magic test.  The simple
-workaround for this was to stop the test, align the engine from the forward direction or manually set forward
-direction from the throttle.  In the end I forgot to do this enough times that it seemed at a -1 state to the
-state machine for speed magic could help with this issue. PurpleHatModule includes a -1 state that now sets
-the direction of the engine to forward and this has solved the problem.
+The first feature is not scale-specific but rather pertains to the setup used to run purple hat and the IOTT
+stick. I ovserved that, when aligning the engine to the test starting position from the reverse direction,
+the engine would move backward instead of forward for the first leg of the speed magic test.  This
+occasionally led to a direction mismatch, requiring a reboot of the IOTT stick.
+
+To address this issue, a simple workaround is to stop the test, align the engine from the forward direction
+or manually set forward direction from the throttle.  Many times I forgot to set forward direction and
+the test wound with the direction mismatch. As a solution, I introdcued a -1 state to the
+PurpleHatModule state machine for speed magic test. This new state automatically sets the direction of the
+engine to forward, effectively resolving the problem.  This adjustment not only saves time but also
+eliminates one more thing to remember during testing.
 
 ```
  case -1: // force to forward direction in case direction is reversed after test stop.
