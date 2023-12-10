@@ -89,7 +89,7 @@ can ask Hans Tanner about including one or more of them into the main IOTT repos
 
 ## Force Forward At Speed Magic Test Start.
 The first feature is not scale-specific but rather pertains to the setup used to run purple hat and the IOTT
-stick. I ovserved that, when aligning the engine to the test starting position from the reverse direction,
+stick. I obvserved that, when aligning the engine to the test starting position from the reverse direction,
 the engine would move backward instead of forward for the first leg of the speed magic test.  This
 occasionally led to a direction mismatch, requiring a reboot of the IOTT stick.
 
