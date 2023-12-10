@@ -95,8 +95,8 @@ occasionally led to a direction mismatch, requiring a reboot of the IOTT stick.
 
 To address this issue, a simple workaround is to stop the test, align the engine from the forward direction
 or manually set forward direction from the throttle.  Many times I forgot to set forward direction and
-the test wound with the direction mismatch. As a solution, I introdcued a -1 state to the
-PurpleHatModule state machine for speed magic test. This new state automatically sets the direction of the
+the test wound up with the direction mismatch. As a solution, I introdcued a -1 state to the
+PurpleHatModule state machine for the speed magic test. This new state automatically sets the direction of the
 engine to forward, effectively resolving the problem.  This adjustment not only saves time but also
 eliminates one more thing to remember during testing.
 
