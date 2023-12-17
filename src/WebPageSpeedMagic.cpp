@@ -153,7 +153,8 @@ char WebPageSpeedMagic::_html[] PROGMEM = R"rawliteral(
                 <button id="testCsv" class="profilebutton">To Csv</button>
                 <input type="file" id="load-speedData-btn" style="display:none" onChange="loadSpeedData(this)"/>
                 <button id="importCsv" class="profilebutton" onClick="loadSpeedDataDlg(this)">Ld Csv</button>
-                <button id="calculate" class="profilebutton" onClick="calcTable(this)">Calc</button>
+                <button id="calculate" class="profilebutton" onClick="calcTable(this)">Calc</button>                
+                <button id="saveProfile" class="profilebutton">To Prof</button>
                 <p>Profile Test</p>
             </div>            
             <canvas id="chart-speed-data" width="600" height="400"></canvas>
@@ -210,6 +211,7 @@ char WebPageSpeedMagic::_html[] PROGMEM = R"rawliteral(
   </div>
   <script src="regression.js"></script>
   <script src="canvasjsascsv.min.js"></script>
+  <script src="SpeedToProfile.js"></script>
   <script src="papaparse.min.js"></script> 
   <script src="SpeedMagicDisplay.js"></script>  
 </body>

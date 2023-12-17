@@ -335,6 +335,7 @@ function initProfileChart(){
   }); 
 
   CanvasJSDataAsCSV(profileChart, "Profile_Data", "testCsv");
+  SpeedDataToProfile(profileChart, "Throttle_Data", "saveProfile");
 }
 
 function loadJMRIDlg(sender)
