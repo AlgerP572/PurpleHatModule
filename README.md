@@ -1,7 +1,7 @@
 # PurpleHat- Background
 Purple hat is a hardware platform by Hans Tanner used to automate speed profiling for Digital Command
 Control (DCC) equipped model railroad locomotives.  Both the hardware design and provided software are
-open source and can by found on the IOTT stick git hub repository:
+open source and can by found on the internet of toy trains (IOTT) stick git hub repository:
 
 https://github.com/tanner87661/IoTTStick
 
@@ -80,6 +80,58 @@ upload_speed = 115200
 build_type = debug
 monitor_filters = esp32_exception_decoder
 ```
+# Added Features
+The purple hat modulule SW introduces several additional features not present in the original purple
+hat IOTT version.  These features are designed with G-scale modellers in mind, and help to ease the
+process of the speed magic test. While tailored for G-scale, the new features may also prove valuable
+for enthusiasts in other scales. If there is interest in these features, let me know and perhaps I
+can ask Hans Tanner about including one or more of them into the main IOTT repository.
+
+## Force Forward At Speed Magic Test Start.
+The first feature is not scale-specific but rather pertains to the setup used to run purple hat and the IOTT
+stick. I obvserved that, when aligning the engine to the test starting position from the reverse direction,
+the engine would move backward instead of forward for the first leg of the speed magic test.  This
+occasionally led to a direction mismatch, requiring a reboot of the IOTT stick.
+
+To address this issue, a simple workaround is to stop the test, align the engine from the forward direction
+or manually set forward direction from the throttle.  Many times I forgot to set forward direction and
+the test wound up with the direction mismatch. As a solution, I introdcued a -1 state to the
+PurpleHatModule state machine for the speed magic test. This new state automatically sets the direction of the
+engine to forward, effectively resolving the problem.  This adjustment not only saves time but also
+eliminates one more thing to remember during testing.
+
+```
+ case -1: // force to forward direction in case direction is reversed after test stop.
+            {
+                Log::println("Start test set forward.", LogLevel::INFO);
+                forwardDirCommand();
+                upDirIndex = speedSample.adminData.upDir ? 1 : 0;
+                forwardDir = ((*focusSlot)[3] & 0x20) == 0x20;
+
+               
+                speedSample.adminData.testState[0].startSpeedStep = 0;
+                speedSample.adminData.testState[1].startSpeedStep = 0;
+
+                // Set these for testing to start at a different step.
+                speedSample.adminData.testState[0].lastSpeedStep = 0;
+                speedSample.adminData.testState[1].lastSpeedStep = 0;
+                speedSample.adminData.testRemainingDistanceStartingLinIntegrator = 0;
+                speedSample.adminData.masterPhase = 0;
+                speedSample.adminData.result = 0;
+            }
+            break;
+```
+
+## Warning For Short Track Length
+One of the more difficult settings to tune to the correct value was the track length for the test.  Through 
+this process I discovered that the speed magic test perfoms best with G scale with long distances.  Currently
+the shortest distance I use is 13500 mm.  Ocassionally, I found with distances that were too short that the
+test was not able to measure a single speed step and it could get into an infinite loop since the step counter
+was not effectively incrementing.  To fix this a feauture was added to the test where it now requires a minumum
+of at least two speed steps to be completed in a single speed magic pass.  If the minimum two speed steps are
+not completed in a given test test cycle, the stops width a warning that the track length may be too short.
+
+![image](https://github.com/AlgerP572/PurpleHatModule/assets/13104848/e785ec78-c405-4abf-95d8-40059400ea7e)
 
 
 # Measurements Folder
