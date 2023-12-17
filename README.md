@@ -81,7 +81,7 @@ build_type = debug
 monitor_filters = esp32_exception_decoder
 ```
 # Added Features
-The purple hat modulule SW introduces several additional features not present in the original purple
+The purple hat module SW introduces several additional features not present in the original purple
 hat IOTT version.  These features are designed with G-scale modellers in mind, and help to ease the
 process of the speed magic test. While tailored for G-scale, the new features may also prove valuable
 for enthusiasts in other scales. If there is interest in these features, let me know and perhaps I
