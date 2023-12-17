@@ -154,7 +154,7 @@ char WebPageSpeedMagic::_html[] PROGMEM = R"rawliteral(
                 <input type="file" id="load-speedData-btn" style="display:none" onChange="loadSpeedData(this)"/>
                 <button id="importCsv" class="profilebutton" onClick="loadSpeedDataDlg(this)">Ld Csv</button>
                 <button id="calculate" class="profilebutton" onClick="calcTable(this)">Calc</button>                
-                <button id="saveProfile" class="profilebutton">To Prof</button>
+                <button id="saveProfile" class="profilebutton">Throt</button>
                 <p>Profile Test</p>
             </div>            
             <canvas id="chart-speed-data" width="600" height="400"></canvas>

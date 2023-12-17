@@ -38,18 +38,38 @@ function convertChartDataToProfile(args) {
     throttleDef.GraphData.ValsY.push(args.data.datasets[3].data[data[3].data.length - 1].y);
     throttleDef.GraphData.ValsY.push(10);
 
+    var throttleFit = regression.polynomial(args.data.datasets[3].data, { order: 7, precision: 16 });
+    console.log(throttleFit);
+   
     // all datasets should have the same number of points.  
-    var step = Math.floor(data[3].data.length/10);
-    for(var i = 0; i < data[3].data.length; i+= step)
-    { 
-        for(var j = 3; j < 4; j++)
-        {    
-            var newElement = JSON.parse(JSON.stringify(DataElementTemplate)); // = {"x":0,"y":0};
-	        newElement.x = args.data.datasets[0].data[i].x;
-	        newElement.y = args.data.datasets[j].data[i].y;
-	    	throttleDef.GraphData.DataElements.push(newElement);
+    var step = Math.floor(throttleFit.points.length / 10);
+    var vMax = 0;
+    var atStep = 0;
+
+    for(var i = 0; i < throttleFit.points.length; i+= step)
+    {
+        var newElement = JSON.parse(JSON.stringify(DataElementTemplate)); // = {"x":0,"y":0};
+
+        newElement.x = throttleFit.points[i].x;
+	    newElement.y = Math.floor(throttleFit.points[i].y);
+	    throttleDef.GraphData.DataElements.push(newElement);
+
+        if(newElement.y > vMax)
+        {
+            vMax = newElement.y;
+            atStep = i;
         }
     }
+
+    throttleDef.SpeedSteps = 128;
+    throttleDef.VMax = vMax;
+    throttleDef.AtStep = atStep;
+
+    var newElement = JSON.parse(JSON.stringify(DataElementTemplate)); // = {"x":0,"y":0};
+    newElement.x = throttleFit.points[126].x;
+	newElement.y = throttleFit.points[126].y;
+	throttleDef.GraphData.DataElements.push(newElement);
+
     console.log(throttleDef.GraphData.DataElements);
 
     var json = JSON.stringify(throttleDef);
