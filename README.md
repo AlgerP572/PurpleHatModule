@@ -133,6 +133,45 @@ not completed in a given test test cycle, the stops width a warning that the tra
 
 ![image](https://github.com/AlgerP572/PurpleHatModule/assets/13104848/e785ec78-c405-4abf-95d8-40059400ea7e)
 
+## Support for testing with acceleration / deceleration values
+The purple hat sensor, as provided from IOTT, requires setting the acceleration and decleration CVs for the decoder
+to a value of 0.  Unfortuately, many G-scale can suffer from cracked drive gears if drive forces exceed
+certain levels.  At higher speeds, I felt uneasy with the engines being directly driven to high 
+speeds and stopped very quickly during the speed magic test.  As a consequence, in the purple hat module version
+of the test, support was added to wait for the engine to come up to speed before the testing resumes for the
+next test sequence. A downside to this approach is that the speed magic test will require a longer track length in
+order to complete successfully.  See the previous feature regarding the warning added to support a track length that
+is too short.  This can help "dial in" the correct track length for the speed magic test.
+
+As with the force direction feature an additional state was added to the state machine to achieve this new function.
+(It is step 4 and the original IOTT step four is now step 5 in the state machine.)  As can be seen with this new step
+in the state machine the speed magic test waits for either the speed to be 80% of the speed from where the test left
+off or 35% of the tracklength distance used for the test is passed.  In this way smaller acceleration and deceleration
+values can be used to reduce stress on engine drive components.
+
+```
+ case 4:
+                if(speedSample.adminData.testState[upDirIndex].lastSpeedStep > 1)
+                {
+                    float_t dataEntry = forwardDir ? speedSample.fw[speedSample.adminData.testState[upDirIndex].lastSpeedStep] : speedSample.bw[speedSample.adminData.testState[upDirIndex].lastSpeedStep];
+                    float_t distanceSoFarDirection = cpyData.relIntegrator - speedSample.adminData.testRemainingDistanceStartingLinIntegrator;
+
+                    if(abs(cpyData.currSpeedTech) < (0.80 * dataEntry) &&
+                        (abs(distanceSoFarDirection) < (0.35 * speedSample.adminData.testTrackLen)))
+                    {
+                        Log::print("Wait for speed: [mm/s] ", LogLevel::INFO);
+                        Log::print(cpyData.currSpeedTech, LogLevel::INFO);
+                        Log::print("accel: [km/h s]", LogLevel::INFO);                        
+                        Log::println(cpyData.currScaleAccelTech, LogLevel::INFO);                       
+                        Log::print("distance so far: ", LogLevel::INFO);
+                        Log::println(distanceSoFarDirection , LogLevel::INFO);
+                        return true;
+                    }                   
+                }
+                speedSample.adminData.masterPhase++;
+            break;
+```
+
 
 # Measurements Folder
 This folder contains various measurements I've made for the G-scale engines in the fleet.  The roster folder contains an excel template that documents the various steps for the profiling. i.e. Set high, mid, low speed control, CV29 bit 4, wheel diameter etc.  It also shows an overview of the pre-calibrated, speed table and post calibrated data. An example for the RhB 616 Kohle is below:
