@@ -133,7 +133,7 @@ not completed in a given test test cycle, the stops width a warning that the tra
 
 ![image](https://github.com/AlgerP572/PurpleHatModule/assets/13104848/e785ec78-c405-4abf-95d8-40059400ea7e)
 
-## Support for testing with acceleration / deceleration values
+## Support For Testing With Acceleration / Deceleration Values
 The purple hat sensor, as provided from IOTT, requires setting the acceleration and decleration CVs for the decoder
 to a value of 0.  Unfortuately, many G-scale can suffer from cracked drive gears if drive forces exceed
 certain levels.  At higher speeds, I felt uneasy with the engines being directly driven to high 
@@ -143,11 +143,11 @@ next test sequence. A downside to this approach is that the speed magic test wil
 order to complete successfully.  See the previous feature regarding the warning added to support a track length that
 is too short.  This can help "dial in" the correct track length for the speed magic test.
 
-As with the force direction feature an additional state was added to the state machine to achieve this new function.
+As with the force forward direction feature, an additional state was added to the state machine to achieve this new function.
 (It is step 4 and the original IOTT step four is now step 5 in the state machine.)  As can be seen with this new step
 in the state machine the speed magic test waits for either the speed to be 80% of the speed from where the test left
-off or 35% of the tracklength distance used for the test is passed.  In this way smaller acceleration and deceleration
-values can be used to reduce stress on engine drive components.
+off or 35% of the tracklength distance used for the test (whichever comes first).  In this way smaller acceleration and
+deceleration values can be used to reduce stress on engine drive components.
 
 ```
  case 4:
