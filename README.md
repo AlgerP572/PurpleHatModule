@@ -179,6 +179,7 @@ DCC standard.  However it may still be desirable to run a second engine in a con
 support programming custom speed tables.  One option could be to replace the decoder in the engine that does not
 support speed matching with one that does.  But the original decoder may have other desirable features such as
 custom sounds that may not be available on the replacement decoder.
+
 Purple Hat Module adds a feature where a measured locomotive speed profile can be converted to a throttle profile.
 The new throttle profile can be used with IOTT pruple hat's speed table recalculation feature to generate a new
 custom speed table for the other engine in the consist. Obivously any engine in the consist must be capable of having its
