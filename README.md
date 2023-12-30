@@ -135,7 +135,7 @@ not completed in a given test test cycle, the stops width a warning that the tra
 
 ## Support For Testing With Acceleration / Deceleration Values
 The purple hat sensor, as provided from IOTT, requires setting the acceleration and decleration CVs for the decoder
-to a value of 0.  Unfortuately, many G-scale can suffer from cracked drive gears if drive forces exceed
+to a value of 0.  Unfortuately, many G-scale locomotives can suffer from cracked drive gears if drive forces exceed
 certain levels.  At higher speeds, I felt uneasy with the engines being directly driven to high 
 speeds and stopped very quickly during the speed magic test.  As a consequence, in the purple hat module version
 of the test, support was added to wait for the engine to come up to speed before the testing resumes for the
