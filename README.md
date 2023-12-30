@@ -136,18 +136,22 @@ not completed in a given test test cycle, the stops width a warning that the tra
 ## Support For Testing With Acceleration / Deceleration Values
 The purple hat sensor, as provided from IOTT, requires setting the acceleration and decleration CVs for the decoder
 to a value of 0.  Unfortuately, many G-scale locomotives can suffer from cracked drive gears if drive forces exceed
-certain levels.  At higher speeds, I felt uneasy with the engines being directly driven to high 
-speeds and stopped very quickly during the speed magic test.  As a consequence, in the purple hat module version
-of the test, support was added to wait for the engine to come up to speed before the testing resumes for the
-next test sequence. A downside to this approach is that the speed magic test will require a longer track length in
-order to complete successfully.  See the previous feature regarding the warning added to support a track length that
-is too short.  This can help "dial in" the correct track length for the speed magic test.
+certain levels.  At higher speeds, I felt uneasy with the engines being directly driven to high speeds and stopped
+very quickly during the speed magic test.
 
-As with the force forward direction feature, an additional state was added to the state machine to achieve this new function.
-(It is step 4 and the original IOTT step four is now step 5 in the state machine.)  As can be seen with this new step
-in the state machine the speed magic test waits for either the speed to be 80% of the speed from where the test left
-off or 35% of the tracklength distance used for the test (whichever comes first).  In this way smaller acceleration and
-deceleration values can be used to reduce stress on engine drive components.
+As a consequence, in the purple hat module version of the test, support was added to wait for the engine to come up
+to speed before the testing resumes for the next test sequence or pass.  This feature allows non-zero accelertion /
+deceleration values to be used during the test. A downside to this approach is that the speed magic test will
+require a longer track length in order to complete successfully.  See the previous feature regarding the warning
+added to support a track length that is too short.  This can help "dial in" the correct track length for the speed
+magic test.
+
+As with the force forward direction feature described above, an additional state was added to the state machine to
+achieve this new function. (The new step is step 4 and the original IOTT step four is now step 5 in the state
+machine.)  As can be seen with this new step in the state machine the speed magic test waits for either the speed to
+be 80% of the speed from where the test left off or 35% of the tracklength distance used for the test (whichever
+comes first).  In this way acceleration and deceleration values can be used to reduce stress on engine drive
+components.
 
 ```
  case 4:
@@ -178,7 +182,8 @@ It is still possible in G-scale to find engines whose decoders do not support th
 DCC standard.  However it may still be desirable to run a second engine in a consist with the engine that does not
 support programming custom speed tables.  One option could be to replace the decoder in the engine that does not
 support speed matching with one that does.  But the original decoder may have other desirable features such as
-custom sounds that may not be available on the replacement decoder.
+custom sounds or smoke generator settings that may not be available on the replacement decoder and/or very difficult
+to reproduce on the reaplcement decoder.
 
 Purple Hat Module adds a feature where a measured locomotive speed profile can be converted to a throttle profile.
 The new throttle profile can be used with IOTT pruple hat's speed table recalculation feature to generate a new
