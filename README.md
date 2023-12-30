@@ -172,6 +172,19 @@ deceleration values can be used to reduce stress on engine drive components.
             break;
 ```
 
+## Measured Profile To Speed Profile
+
+It is still possible in G-scale to find engines whose decoders do not support the 28-step speed table of the NMRA
+DCC standard.  However it may still be desirable to run a second engine in a consist with the engine that does not
+support programming custom speed tables.  One option could be to replace the decoder in the engine that does not
+support speed matching with one that does.  But the original decoder may have other desirable features such as
+custom sounds that may not be available on the replacement decoder.
+Purple Hat Module adds a feature where a measured locomotive speed profile can be converted to a throttle profile.
+The new throttle profile can be used with IOTT pruple hat's speed table recalculation feature to generate a new
+custom speed table for the other engine in the consist. Obivously any engine in the consist must be capable of having its
+speed table programmed. Now both engines can be consisted together becuase the second engine has been speed matched
+to the first engine that did not support 28-step speed tables.
+
 
 # Measurements Folder
 This folder contains various measurements I've made for the G-scale engines in the fleet.  The roster folder contains an excel template that documents the various steps for the profiling. i.e. Set high, mid, low speed control, CV29 bit 4, wheel diameter etc.  It also shows an overview of the pre-calibrated, speed table and post calibrated data. An example for the RhB 616 Kohle is below:
