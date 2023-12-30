@@ -186,6 +186,22 @@ custom speed table for the other engine in the consist. Obivously any engine in 
 speed table programmed. Now both engines can be consisted together becuase the second engine has been speed matched
 to the first engine that did not support 28-step speed tables.
 
+|Measured Speed Profile: Reference Engine|Throttle Profile: Reference Engine|
+|---|---|
+|![image](https://github.com/AlgerP572/PurpleHatModule/assets/13104848/67ee3b39-e449-4037-88c6-96465a98c57f)|![image](https://github.com/AlgerP572/PurpleHatModule/assets/13104848/333b9c1e-f38e-405b-8866-78267353f104)|
+
+|Measured Speed Profile: Engine To Match|Matched Speed Table: Engine To Match|
+|---|---|
+|![image](https://github.com/AlgerP572/PurpleHatModule/assets/13104848/a137f901-447c-40a7-9e57-9e8b83d6ad87)|![image](https://github.com/AlgerP572/PurpleHatModule/assets/13104848/b038c816-e7dc-4ec7-813e-007cab66f027)|
+
+As can be seen from above after using the generated throttle profile from the reference engine the new calculated
+speed table for the engine to match when applied now allows the speed to very closely match the speed of the
+reference engine allowing them to be run in a consist together.  Here it is on the layout:
+
+|Consist with Reference Engine and Engine to match|
+|---|
+|![image](https://github.com/AlgerP572/PurpleHatModule/assets/13104848/063fd03e-a726-43e9-80b2-5bbd34b0583f)|
+
 
 # Measurements Folder
 This folder contains various measurements I've made for the G-scale engines in the fleet.  The roster folder contains an excel template that documents the various steps for the profiling. i.e. Set high, mid, low speed control, CV29 bit 4, wheel diameter etc.  It also shows an overview of the pre-calibrated, speed table and post calibrated data. An example for the RhB 616 Kohle is below:
