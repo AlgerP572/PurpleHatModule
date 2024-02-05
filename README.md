@@ -24,7 +24,7 @@ This github repository comprises a derivative work from Hans Tanner's Purple hat
 derivative software supports over the air (OTA) firmware (FW) download and OTA logging. Adding the
 ability to download FW over the air wirelessely allows the M5 stick to be updated in place on the layout
 without a COM port connection.  This is a nice feature since the battery I use to run the M5 stick does
-not allow for COM port access. With OTS FW dowload I can also update the M5 FW without having to remove
+not allow for COM port access. With OTA FW dowload I can also update the M5 FW without having to remove
 the M5 from the battery.
 
 ![image](https://github.com/AlgerP572/PurpleHatModule/assets/13104848/e121b220-d1f1-422f-9402-e60637b5293a)
@@ -133,21 +133,25 @@ not completed in a given test test cycle, the stops width a warning that the tra
 
 ![image](https://github.com/AlgerP572/PurpleHatModule/assets/13104848/e785ec78-c405-4abf-95d8-40059400ea7e)
 
-## Support for testing with acceleration / deceleration values
+## Support For Testing With Acceleration / Deceleration Values
 The purple hat sensor, as provided from IOTT, requires setting the acceleration and decleration CVs for the decoder
-to a value of 0.  Unfortuately, many G-scale can suffer from cracked drive gears if drive forces exceed
-certain levels.  At higher speeds, I felt uneasy with the engines being directly driven to high 
-speeds and stopped very quickly during the speed magic test.  As a consequence, in the purple hat module version
-of the test, support was added to wait for the engine to come up to speed before the testing resumes for the
-next test sequence. A downside to this approach is that the speed magic test will require a longer track length in
-order to complete successfully.  See the previous feature regarding the warning added to support a track length that
-is too short.  This can help "dial in" the correct track length for the speed magic test.
+to a value of 0.  Unfortuately, many G-scale locomotives can suffer from cracked drive gears if drive forces exceed
+certain levels.  At higher speeds, I felt uneasy with the engines being directly driven to high speeds and stopped
+very quickly during the speed magic test.
 
-As with the force direction feature an additional state was added to the state machine to achieve this new function.
-(It is step 4 and the original IOTT step four is now step 5 in the state machine.)  As can be seen with this new step
-in the state machine the speed magic test waits for either the speed to be 80% of the speed from where the test left
-off or 35% of the tracklength distance used for the test is passed.  In this way smaller acceleration and deceleration
-values can be used to reduce stress on engine drive components.
+As a consequence, in the purple hat module version of the test, support was added to wait for the engine to come up
+to speed before the testing resumes for the next test sequence or pass.  This feature allows non-zero accelertion /
+deceleration values to be used during the test. A downside to this approach is that the speed magic test will
+require a longer track length in order to complete successfully.  See the previous feature regarding the warning
+added to support a track length that is too short.  This can help "dial in" the correct track length for the speed
+magic test.
+
+As with the force forward direction feature described above, an additional state was added to the state machine to
+achieve this new function. (The new step is step 4 and the original IOTT step four is now step 5 in the state
+machine.)  As can be seen with this new step in the state machine the speed magic test waits for either the speed to
+be 80% of the speed from where the test left off or 35% of the tracklength distance used for the test (whichever
+comes first).  In this way acceleration and deceleration values can be used to reduce stress on engine drive
+components.
 
 ```
  case 4:
@@ -171,6 +175,37 @@ values can be used to reduce stress on engine drive components.
                 speedSample.adminData.masterPhase++;
             break;
 ```
+
+## Measured Profile To Speed Profile
+
+It is still possible in G-scale to find engines whose decoders do not support the 28-step speed table of the NMRA
+DCC standard.  However it may still be desirable to run a second engine in a consist with the engine that does not
+support programming custom speed tables.  One option could be to replace the decoder in the engine that does not
+support speed matching with one that does.  But the original decoder may have other desirable features such as
+custom sounds or smoke generator settings that may not be available on the replacement decoder and/or very difficult
+to reproduce on the reaplcement decoder.
+
+Purple Hat Module adds a feature where a measured locomotive speed profile can be converted to a throttle profile.
+The new throttle profile can be used with IOTT pruple hat's speed table recalculation feature to generate a new
+custom speed table for the other engine in the consist. Obivously any engine in the consist must be capable of having its
+speed table programmed. Now both engines can be consisted together becuase the second engine has been speed matched
+to the first engine that did not support 28-step speed tables.
+
+|Measured Speed Profile: Reference Engine|Throttle Profile: Reference Engine|
+|---|---|
+|![image](https://github.com/AlgerP572/PurpleHatModule/assets/13104848/67ee3b39-e449-4037-88c6-96465a98c57f)|![image](https://github.com/AlgerP572/PurpleHatModule/assets/13104848/333b9c1e-f38e-405b-8866-78267353f104)|
+
+|Measured Speed Profile: Engine To Match|Matched Speed Table: Engine To Match|
+|---|---|
+|![image](https://github.com/AlgerP572/PurpleHatModule/assets/13104848/a137f901-447c-40a7-9e57-9e8b83d6ad87)|![image](https://github.com/AlgerP572/PurpleHatModule/assets/13104848/b038c816-e7dc-4ec7-813e-007cab66f027)|
+
+As can be seen from above after using the generated throttle profile from the reference engine the new calculated
+speed table for the engine to match when applied now allows the speed to very closely match the speed of the
+reference engine allowing them to be run in a consist together.  Here it is on the layout:
+
+|Consist with Reference Engine and Engine to match|
+|---|
+|![image](https://github.com/AlgerP572/PurpleHatModule/assets/13104848/063fd03e-a726-43e9-80b2-5bbd34b0583f)|
 
 
 # Measurements Folder
