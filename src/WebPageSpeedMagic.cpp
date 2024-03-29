@@ -225,7 +225,6 @@ unsigned long WebPageSpeedMagic::_timerDelay = 1000;
 int WebPageSpeedMagic::_millisRollOver = 0;
 unsigned long WebPageSpeedMagic::_lastMillis = 0;
 String WebPageSpeedMagic::_latestSpeedTableData = "";
-String WebPageSpeedMagic::BBVersion = "1.6.0";
 
 void WebPageSpeedMagic::handleWebSocketMessage(void *arg, uint8_t *data, size_t len)
 {
@@ -470,7 +469,7 @@ void WebPageSpeedMagic::GetStats(String& jsonData)
     Data["totaldisk"] = String(SPIFFS.totalBytes());
     Data["useddisk"] = String(SPIFFS.usedBytes());
     Data["freedisk"] = String(SPIFFS.totalBytes() - SPIFFS.usedBytes());
-    Data["version"] = BBVersion;
+    Data["version"] = VERSION;
     Data["ipaddress"] = WiFi.localIP().toString();
     Data["sigstrength"] = WiFi.RSSI();
     Data["apname"] = WiFi.SSID();
@@ -481,7 +480,7 @@ void WebPageSpeedMagic::GetStats(String& jsonData)
     Data["pwrbat"] = M5.Power.Axp192.getBatteryPower();
     Data["ubus"] = M5.Power.Axp192.getVBUSVoltage();
     Data["ibus"] = M5.Power.Axp192.getVBUSCurrent();
-    Data["uin"] = M5.Power.Axp192.getACINVolatge();
+    Data["uin"] = M5.Power.Axp192.getACINVoltage();
     Data["iin"] = M5.Power.Axp192.getACINCurrent();
 
     serializeJson(doc, jsonData);

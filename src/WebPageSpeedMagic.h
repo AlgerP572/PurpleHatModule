@@ -6,6 +6,7 @@
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 #include <ESPAsyncWiFiManager.h>
+#include <version.h>
 
 class WebPageSpeedMagic
 {
@@ -16,7 +17,6 @@ private:
     static AsyncEventSource _events;
     static int _millisRollOver;
     static unsigned long _lastMillis;
-    static String BBVersion;
     static String _latestSpeedTableData;
 
     // Timer variables

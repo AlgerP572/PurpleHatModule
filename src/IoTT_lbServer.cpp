@@ -1786,7 +1786,7 @@ bool IoTT_LBServer::sendWIServerMessageStringWI(AsyncClient * thisClient, uint8_
 {
 	String outStr;
 	char outBuf[100];
-//	extern String BBVersion;
+
 	switch (replyType)
 	{
 		case 0: outStr = "VN2.0"; break;

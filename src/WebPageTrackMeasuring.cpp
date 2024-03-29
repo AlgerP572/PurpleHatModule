@@ -162,7 +162,6 @@ unsigned long WebPageTrackMeasuring::_lastTime = 0;
 unsigned long WebPageTrackMeasuring::_timerDelay = 1000;
 int WebPageTrackMeasuring::_millisRollOver = 0;
 unsigned long WebPageTrackMeasuring::_lastMillis = 0;
-String WebPageTrackMeasuring::BBVersion = "1.6.0";
 
 void WebPageTrackMeasuring::handleWebSocketMessage(void *arg, uint8_t *data, size_t len)
 {
@@ -374,7 +373,7 @@ void WebPageTrackMeasuring::GetStats(String& jsonData)
     Data["totaldisk"] = String(SPIFFS.totalBytes());
     Data["useddisk"] = String(SPIFFS.usedBytes());
     Data["freedisk"] = String(SPIFFS.totalBytes() - SPIFFS.usedBytes());
-    Data["version"] = BBVersion;
+    Data["version"] = VERSION;
     Data["ipaddress"] = WiFi.localIP().toString();
     Data["sigstrength"] = WiFi.RSSI();
     Data["apname"] = WiFi.SSID();

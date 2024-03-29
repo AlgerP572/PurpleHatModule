@@ -5,8 +5,6 @@
 #include "WebServer.h"
 #include "WebPageTrackMeasuring.h"
 #include "WebPageSpeedMagic.h"
-#include "WebPageCV.h"
-#include "WebPagePurpleHat.h"
 #include "WifiConnection.h"
 #include "WifiSerialDebug.h"
 #include "WifiFirmware.h"
@@ -95,9 +93,7 @@ void setup()
   
     // Start supported services
     WebPageTrackMeasuring::begin(server);
-    WebPageSpeedMagic::begin(server);
-    WebPageCv::begin(server);
-    WebPagePurpleHat::begin(server);
+    WebPageSpeedMagic::begin(server);    
     WifiFirmware::begin(server);
     WebServer::begin();
   
