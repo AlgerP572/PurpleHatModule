@@ -53,7 +53,7 @@ void setup()
   
     // If you get here you have connected to the WiFi    
     Serial.println("connected...");
-    M5.Lcd.println("Engine: ");    
+    M5.Lcd.println(VERSION_SHORT);    
     M5.Lcd.println(WiFi.localIP());
 
     // I have found using the goolge standard nameserver a little more robust.
@@ -105,7 +105,7 @@ void setup()
          
     // Leave this last so when you see this on the M5 screen you know
     // that the M5 is good to go...     
-    M5.Lcd.println("HTTP server started");    
+    M5.Lcd.println("HTTP started");    
 }
 
 void loop()
