@@ -30,7 +30,7 @@ the M5 from the battery.
 ![image](https://github.com/AlgerP572/PurpleHatModule/assets/13104848/e121b220-d1f1-422f-9402-e60637b5293a)
 
 > [!NOTE]
-> This is Purple hat only other hats have been removed and only a subset of the features are supprted.
+> This is Purple hat only other hats have been removed and only a subset of the features are supported.
 > This was to make flash memory space available for the the over the air FW download and over the air debug
 > logging.
 
