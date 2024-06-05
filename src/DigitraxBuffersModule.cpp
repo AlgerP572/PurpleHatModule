@@ -24,9 +24,12 @@ void DigitraxBuffersModule::begin()
 {
 }
 
-void DigitraxBuffersModule::loop()
+bool DigitraxBuffersModule::loop()
 {
     _digitraxBuffer->processLoop();
+
+    // TODO: optimize
+    return false;
 }
 
 void DigitraxBuffersModule::processLocoNetMsg(lnReceiveBuffer* newData)

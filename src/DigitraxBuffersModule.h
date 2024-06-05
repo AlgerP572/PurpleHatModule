@@ -15,7 +15,7 @@ private:
 public:
     static void setup(txFct lnOut);
     static void begin();
-    static void loop();
+    static bool loop();
 
     static void processLocoNetMsg(lnReceiveBuffer* newData);
 };

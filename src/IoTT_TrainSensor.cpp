@@ -781,16 +781,16 @@ bool IoTT_TrainSensor::processSpeedTest(String& speedTableData) //returns false 
 
  				//if there's room, proceed
                 Log::print("Test phase = ", LogLevel::INFO);
-                Log::print(speedSample.adminData.testState[upDirIndex].testPhase, LogLevel::INFO);
+                Log::print((uint8_t) speedSample.adminData.testState[upDirIndex].testPhase, LogLevel::INFO);
                 Log::print("  upDirIndex = ", LogLevel::INFO);
-                Log::println(upDirIndex, LogLevel::INFO);
+                Log::println((uint8_t) upDirIndex, LogLevel::INFO);
 
  				switch (speedSample.adminData.testState[upDirIndex].testPhase)
  				{
  					case 0: //set initial speed
  					{
  						Log::print("Start Meas ", LogLevel::INFO);
-                        Log::println(speedSample.adminData.testState[upDirIndex].lastSpeedStep, LogLevel::INFO);
+                        Log::println((uint8_t) speedSample.adminData.testState[upDirIndex].lastSpeedStep, LogLevel::INFO);
  						uint8_t oldSpeed = speedSample.adminData.currSpeedStep; 
 
  						if (speedSample.adminData.testState[upDirIndex].lastSpeedStep == 0)
@@ -851,7 +851,7 @@ bool IoTT_TrainSensor::processSpeedTest(String& speedTableData) //returns false 
  							{
  								speedSample.adminData.testState[upDirIndex].crawlSpeedStep = speedSample.adminData.currSpeedStep;
  								Log::print("set crawl speed ", LogLevel::INFO);
-                                Log::println(speedSample.adminData.currSpeedStep, LogLevel::INFO);
+                                Log::println((uint8_t) speedSample.adminData.currSpeedStep, LogLevel::INFO);
  							}
  							speedSample.adminData.testState[upDirIndex].lastSpeedStep = speedSample.adminData.currSpeedStep;
 
@@ -892,7 +892,7 @@ bool IoTT_TrainSensor::processSpeedTest(String& speedTableData) //returns false 
  					newSpeed = speedSample.adminData.testState[upDirIndex].crawlSpeedStep;
 
                 Log::print("Move to track end ", LogLevel::INFO);
-                Log::print(newSpeed, LogLevel::INFO);
+                Log::print((uint8_t)newSpeed, LogLevel::INFO);
                 Log::print(" to go: ", LogLevel::INFO);
                 Log::println(distFromOrigin, LogLevel::INFO);
  				

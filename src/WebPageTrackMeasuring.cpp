@@ -1,160 +1,161 @@
 #include "NTPTimeClient.h"
 #include "WebPageTrackMeasuring.h"
 #include "WifiSerialDebug.h"
+#include "CpuUsage.h"
 
 #include "PurpleHatModule.h"
 #include "ConfigLoader.h"
 
-char WebPageTrackMeasuring::_html[] PROGMEM = R"rawliteral(
-<!DOCTYPE HTML><html>
-<head>
-  <title>Purple Hat Sensor</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" href="data:,">
-  <link rel="stylesheet" type="text/css" href="style.css">
-  <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"
-      integrity="sha512-ElRFoEQdI5Ht6kZvyzXhYG9NqjtkmlkfYk0wr6wHxU9JEHakS7UJZNeml5ALk+8IKlU6jDgMabC3vkumRokgJA=="
-      crossorigin="anonymous"
-      referrerpolicy="no-referrer"
-    ></script>    
-  <style>
-    .topnav { background-color: #800080; }   
-    .reading { font-size: 1.4rem; }
-  </style>
-</head>
-<body>
-  <div class="topnav">
-    <div class="tool-bar">        
-        <a href="/">
-            <button class="btn-group">Track Data</button>
-        </a>
-        <a href="/speedmagic">
-            <button>Speed Magic</button>
-        </a>
-        <a href="/update">
-            <button>FW Update</button>
-        </a>
-        <a href="/webserial">
-            <button>Log</button>
-        </a>
-        <h1>Track Measuring Display</h1>
-    </div>
-  </div>
-  <div class="content">
-    <div class="card-grid">
-      <div class="card">
-        <div class="button-container">
-          <button id="btnStart" class="button" onClick="startMeasuring(this)">Start</button>
-          <button id="btnStart" class="button" onClick=" resetDistance(this)">Reset Distance</button>
-        </div>                   
-        <p><table class="datatable">
-        <tr>
-          <th>Data</th>
-          <th>Value</th>
-          <th>Units</th>          
-        </tr>
-         <tr>
-          <td>Scale</td>
-          <td><span id="scale">%Scale%</span></td>
-          <td><span id="scaleunit">%Scaleunit%</span></td>        
-        </tr>
-        <tr>
-          <td>Wheel Diameter</td>
-          <td><span id="wheeldiameter">%Wheel Diameter%</span></td>
-          <td>[mm]</td>          
-        </tr>
-         <tr>
-          <td>Angle</td>
-          <td><span id="angle">%angle%</span></td>
-          <td>[&deg]</td>          
-        </tr>
-         <tr>
-          <td>Reverse Direction</td>
-          <td><span id="reversedirection">%reversedirection%</span></td>
-          <td></td>          
-        </tr>
-        <tr>
-          <td>Direction</td>
-          <td><span id="direction">%Direction%</span></td>
-          <td></td>          
-        </tr>
-        <tr>
-          <td>Measured Speed</td>
-          <td><span id="measuredspeed">%Measured Soeed%</span></td>
-          <td>[mm/s]</td>          
-        </tr>        
-        <tr>
-          <td>Scale Speed</td>
-          <td><span id="scalespeed">%scalespeed%</span></td>
-          <td>[km/h]</td>
-        </tr>
-        <tr>
-          <td>Absolute Distance</td>
-          <td><span id="absdistance">%absdistance%</span></td>
-          <td>[mm]</td>  
-        </tr>
-        <tr>
-          <td>Relative Distance</td>
-          <td><span id="reldistance">%reldistance%</span></td>
-          <td>[mm]</td>  
-        </tr>
-         <tr>
-          <td>Sampling Rate</td>
-          <td><span id="samplingrate">%samplingrate%</span></td>
-          <td>[Hz]</td>  
-        </tr>
-      </table></p>
-      </div>      
-      <div class="card">
-        <div class="tool-bar-graph">
-          <button id="buttonCsv" class="profilebutton">To Csv</button>
-          <p class="card-title">Speed Data</p>
-        </div>
-          <canvas id="chart-speed-data" width="600" height="400"></canvas>
-        </div>
-    </div>
-  </div>
-  <div class="topnav">
-    <p><table class="footertable">
-      <tr>
-        <td>Date / Time</th>
-        <td><span id="datetime">%datetime%</span></th>
-        <td>IP Address</th>
-        <td><span id="ipaddress">%ipaddress%</span></th>
-        <td>Firmware Version</th>
-        <td><span id="fwversion">%fwversion%</span></th>    
-      </tr>
-      <tr>
-        <td>System Uptime</th>
-        <td><span id="systemuptime">%dsystemuptime%</span></th>
-        <td>Signal Strength</th>
-        <td><span id="signalstrength">%signalstrength%</span></th>
-        <td>Available RAM/Flash</th>
-        <td><span id="ramflash">%ramflash%</span></th>    
-      </tr>
-      <tr>
-        <td>Core Temp</th>
-        <td><span id="coretemp">%coretemp%</span></th>
-        <td>Access Point</th>
-        <td><span id="accesspoint">%accesspoint%</span></th>
-        <td>Bat. Voltage</th>
-        <td><span id="batvoltage">%batvoltage%</span></th>    
-      </tr>
-      <tr>
-        <td>Ext Voltage</th>
-        <td><span id="extvoltage">%extvoltage%</span></th>
-        <td></th>
-        <td></th>
-        <td>Bat. Current</th>
-        <td><span id="batcurrent">%batcurrent%</span></th>    
-      </tr>
-    </table></p>
-  </div>
-    <script src="canvasjsascsv.min.js"></script> 
-    <script src="TrackMeasuringDisplay.js"></script>  
-</body>
-</html>)rawliteral";
+//char WebPageTrackMeasuring::_html[] PROGMEM = R"rawliteral(
+// <!DOCTYPE HTML><html>
+// <head>
+//   <title>Purple Hat Sensor</title>
+//   <meta name="viewport" content="width=device-width, initial-scale=1">
+//   <link rel="icon" href="data:,">
+//   <link rel="stylesheet" type="text/css" href="style.css">
+//   <script
+//       src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"
+//       integrity="sha512-ElRFoEQdI5Ht6kZvyzXhYG9NqjtkmlkfYk0wr6wHxU9JEHakS7UJZNeml5ALk+8IKlU6jDgMabC3vkumRokgJA=="
+//       crossorigin="anonymous"
+//       referrerpolicy="no-referrer"
+//     ></script>    
+//   <style>
+//     .topnav { background-color: #800080; }   
+//     .reading { font-size: 1.4rem; }
+//   </style>
+// </head>
+// <body>
+//   <div class="topnav">
+//     <div class="tool-bar">        
+//         <a href="/">
+//             <button class="btn-group">Track Data</button>
+//         </a>
+//         <a href="/speedmagic">
+//             <button>Speed Magic</button>
+//         </a>
+//         <a href="/update">
+//             <button>FW Update</button>
+//         </a>
+//         <a href="/webserial">
+//             <button>Log</button>
+//         </a>
+//         <h1>Track Measuring Display</h1>
+//     </div>
+//   </div>
+//   <div class="content">
+//     <div class="card-grid">
+//       <div class="card">
+//         <div class="button-container">
+//           <button id="btnStart" class="button" onClick="startMeasuring(this)">Start</button>
+//           <button id="btnStart" class="button" onClick=" resetDistance(this)">Reset Distance</button>
+//         </div>                   
+//         <p><table class="datatable">
+//         <tr>
+//           <th>Data</th>
+//           <th>Value</th>
+//           <th>Units</th>          
+//         </tr>
+//          <tr>
+//           <td>Scale</td>
+//           <td><span id="scale">%Scale%</span></td>
+//           <td><span id="scaleunit">%Scaleunit%</span></td>        
+//         </tr>
+//         <tr>
+//           <td>Wheel Diameter</td>
+//           <td><span id="wheeldiameter">%Wheel Diameter%</span></td>
+//           <td>[mm]</td>          
+//         </tr>
+//          <tr>
+//           <td>Angle</td>
+//           <td><span id="angle">%angle%</span></td>
+//           <td>[&deg]</td>          
+//         </tr>
+//          <tr>
+//           <td>Reverse Direction</td>
+//           <td><span id="reversedirection">%reversedirection%</span></td>
+//           <td></td>          
+//         </tr>
+//         <tr>
+//           <td>Direction</td>
+//           <td><span id="direction">%Direction%</span></td>
+//           <td></td>          
+//         </tr>
+//         <tr>
+//           <td>Measured Speed</td>
+//           <td><span id="measuredspeed">%Measured Soeed%</span></td>
+//           <td>[mm/s]</td>          
+//         </tr>        
+//         <tr>
+//           <td>Scale Speed</td>
+//           <td><span id="scalespeed">%scalespeed%</span></td>
+//           <td>[km/h]</td>
+//         </tr>
+//         <tr>
+//           <td>Absolute Distance</td>
+//           <td><span id="absdistance">%absdistance%</span></td>
+//           <td>[mm]</td>  
+//         </tr>
+//         <tr>
+//           <td>Relative Distance</td>
+//           <td><span id="reldistance">%reldistance%</span></td>
+//           <td>[mm]</td>  
+//         </tr>
+//          <tr>
+//           <td>Sampling Rate</td>
+//           <td><span id="samplingrate">%samplingrate%</span></td>
+//           <td>[Hz]</td>  
+//         </tr>
+//       </table></p>
+//       </div>      
+//       <div class="card">
+//         <div class="tool-bar-graph">
+//           <button id="buttonCsv" class="profilebutton">To Csv</button>
+//           <p class="card-title">Speed Data</p>
+//         </div>
+//           <canvas id="chart-speed-data" width="600" height="400"></canvas>
+//         </div>
+//     </div>
+//   </div>
+//   <div class="topnav">
+//     <p><table class="footertable">
+//       <tr>
+//         <td>Date / Time</td>
+//         <td><span id="datetime">%datetime%</span></td>
+//         <td>IP Address</td>
+//         <td><span id="ipaddress">%ipaddress%</span></td>
+//         <td>Firmware Version</td>
+//         <td><span id="fwversion">%fwversion%</span></td>    
+//       </tr>
+//       <tr>
+//         <td>System Uptime / Cpu Load</td>
+//         <td><span id="systemuptime">%dsystemuptime%</span></td>
+//         <td>Signal Strength</td>
+//         <td><span id="signalstrength">%signalstrength%</span></td>
+//         <td>Available RAM/Flash</td>
+//         <td><span id="ramflash">%ramflash%</span></td>    
+//       </tr>
+//       <tr>
+//         <td>Core Temp</td>
+//         <td><span id="coretemp">%coretemp%</span></td>
+//         <td>Access Point</td>
+//         <td><span id="accesspoint">%accesspoint%</span></td>
+//         <td>Bat. Voltage</td>
+//         <td><span id="batvoltage">%batvoltage%</span></td>    
+//       </tr>
+//       <tr>
+//         <td>Ext Voltage</td>
+//         <td><span id="extvoltage">%extvoltage%</span></td>
+//         <td></td>
+//         <td></td>
+//         <td>Bat. Current</td>
+//         <td><span id="batcurrent">%batcurrent%</span></td>    
+//       </tr>
+//     </table></p>
+//   </div>
+//     <script src="canvasjsascsv.min.js"></script> 
+//     <script src="TrackMeasuringDisplay.js"></script>  
+// </body>
+// </html>)rawliteral";
 
 AsyncWebSocket WebPageTrackMeasuring::_ws("/wstrackmeasuring");
 AsyncEventSource WebPageTrackMeasuring::_events("/eventstrackmeasuring");
@@ -298,9 +299,15 @@ void WebPageTrackMeasuring::begin(AsyncWebServer *server)
     // Route for root / web page
     server->on("/", HTTP_GET, [](AsyncWebServerRequest *request)
     {
-        request->send_P(200,
-            "text/html",
-            _html,
+        // request->send_P(200,
+        //     "text/html",
+        //     _html,
+        //     processor);
+
+        request->send(SPIFFS,
+            "/TrackMeasuring.html",
+            String(),
+            false,
             processor);
     });   
 }
@@ -310,7 +317,7 @@ String WebPageTrackMeasuring::processor(const String& var)
     return String();
 }
 
-void WebPageTrackMeasuring::loop()
+bool WebPageTrackMeasuring::loop()
 {
     if (millis() < _lastMillis)
         _millisRollOver++; // update ms rollover counter
@@ -319,10 +326,11 @@ void WebPageTrackMeasuring::loop()
 
     if (_ws.count() == 0)
     {
-        return;
+        return false;
     }
     _ws.cleanupClients();
 
+    bool result = false;
     if ((millis() - _lastTime) > _timerDelay)
     {
         Log::println("-----", LogLevel::LOOP);
@@ -353,7 +361,10 @@ void WebPageTrackMeasuring::loop()
         }
 
         _lastTime = millis();
+        result = true;
     }
+
+    return result;
 }
 
 void WebPageTrackMeasuring::GetStats(String& jsonData)
@@ -369,6 +380,7 @@ void WebPageTrackMeasuring::GetStats(String& jsonData)
     String formattedTime;
     TimeClient::getFormattedDate(formattedTime);
     Data["systime"] = formattedTime;
+    Data["cpuload"] = CpuUsage::GetCpuLoad();
     Data["freemem"] = String(ESP.getFreeHeap());
     Data["totaldisk"] = String(SPIFFS.totalBytes());
     Data["useddisk"] = String(SPIFFS.usedBytes());

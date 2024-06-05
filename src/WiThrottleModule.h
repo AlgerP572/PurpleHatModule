@@ -15,7 +15,7 @@ private:
 public:
     static void setup();
     static void begin();
-    static void loop();
+    static bool loop();
 
     static uint16_t sendMsg(lnTransmitMsg txData);
 };

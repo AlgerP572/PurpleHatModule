@@ -43,7 +43,10 @@ void WiThrottleModule::begin()
 {
 }
 
-void WiThrottleModule::loop()
+bool WiThrottleModule::loop()
 {
     _lbClient->processLoop();
+
+    // TODO: can this be optimized.
+    return false;
 }

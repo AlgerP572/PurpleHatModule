@@ -1,221 +1,222 @@
 #include "NTPTimeClient.h"
 #include "WebPageSpeedMagic.h"
 #include "WifiSerialDebug.h"
+#include "CpuUsage.h"
 
 #include "PurpleHatModule.h"
 #include "ConfigLoader.h"
 
-char WebPageSpeedMagic::_html[] PROGMEM = R"rawliteral(
-<!DOCTYPE HTML><html>
-<head>
-  <title>Purple Hat Sensor</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" href="data:,">
-  <link rel="stylesheet" type="text/css" href="style.css">
-  <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"
-      integrity="sha512-ElRFoEQdI5Ht6kZvyzXhYG9NqjtkmlkfYk0wr6wHxU9JEHakS7UJZNeml5ALk+8IKlU6jDgMabC3vkumRokgJA=="
-      crossorigin="anonymous"
-      referrerpolicy="no-referrer"
-    ></script>
-  <style>
-    .topnav { background-color: #800080; }   
-    .reading { font-size: 1.4rem; }
-  </style>
-</head>
-<body>
-   <div class="topnav">
-    <div class="tool-bar">        
-        <a href="/">
-            <button class="btn-group">Track Data</button>
-        </a>
-        <a href="/speedmagic">
-            <button>Speed Magic</button>
-        </a>
-        <a href="/update">
-            <button>FW Update</button>
-        </a>
-        <a href="/webserial">
-            <button>Log</button>
-        </a>
-        <h1>Speed Magic</h1>
-    </div>
-  </div>
-  <div class="content">
-    <div class="card-grid">
-      <div class="card">
-        <p><table class="datatable">
-             <tr>
-                <th>Input:</th>
-                <th></th>
-                <th></th>
-                <th></th>
-                <th></th>
-                <th></th>
-            </tr>
-             <tr>
-                <td>JMRI File:</td>               
-                <td>
-                    <div class="tool-bar-graph"> 
-                        <input type="file" id="load-btn" style="display:none" onChange="loadJMRIFile(this)"/>
-                        <button id="load-button" onClick="loadJMRIDlg(this)">Load</button>
-                        <button onClick=" resetDistance(this)">Save</button>
-                    </div>
-                </td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-            </tr>
-            <tr>
-                <td>Throttle:</td>               
-                <td>
-                    <div class="tool-bar-graph"> 
-                        <input type="file" id="load-profile-btn" style="display:none" onChange="loadThrottle(this)"/>
-                        <button id="load-profile-button" onClick="loadThrottleDlg(this)">Load</button>
-                        <button id="button">Save</button>
-                    </div>
-                </td>
-                <td>Speed Step</td>
-                <td><span id="speedstep">%coretemp%</span></td>
-                <td>Direction</td>
-                <td><span id="direction">%direction%</span></td>
-            </tr>
-            <tr>
-                <td>Speed Test:</td>
-                <td>
-                    <div class="tool-bar-graph"> 
-                        <button id="start-speed-test"  onClick="startSpeedTest(this)">Start</button>
-                        <button id="stop-speed-test" onClick="stopSpeedTest(this)">Stop</button>
-                    </div>
-                </td>
-                <td><span>Length [mm]</span></td>
-                <td><input type="number" min="1" max="50000" value="13500" onchange="setTrackLength(this)"/></td>
-                <td><span>v Max [km/h]</td>
-                <td><input id="vMax" type="number" min="1" max="150" value="50" onchange="setTestSpeed(this)"/></td>
-            </tr>        
-        <tr>
-            <th colspan="3">Data</th>
-            <th colspan="3">Value</th>        
-        </tr>
-         <tr>
-          <td colspan="3">File Name</td>
-          <td colspan="3"><span id="jmrifilename">%fileName%</span></td>                  
-        </tr>
-        <tr>
-          <td colspan="3">Locomotive</td>
-          <td colspan="3"><span id="dccloco">%locomotive%</span></td>                   
-        </tr>
-         <tr>
-          <td colspan="3">DCC Address</td>
-          <td colspan="3"><span id="jmriaddr">%dccaddress%</span></td>
-        </tr>
-         <tr>
-          <td colspan="3">Decoder Brand</td>
-          <td colspan="3"><span id="decbrand">%brand%</span></td>
-        </tr>
-        <tr>
-          <td colspan="3">Decoder Family</td>
-          <td colspan="3"><span id="decfamily">%Direction%</span></td>
-        </tr>
-        <tr>
-          <td colspan="3">Decoder Model</td>
-          <td colspan="3"><span id="decmodel">%Measured Soeed%</span></td>
-        </tr>        
-        <tr>
-          <td><span id="cv02">CV 02</span></td>
-          <td><span id="cvn02">%cvvalue%</span></td>
-          <td><span id="cv03">CV 03</span></td>
-          <td><span id="cvn03">%cvvalue%</span></td>
-          <td><span id="cv04">CV 04</span></td>
-          <td><span id="cvn04">%cvvalue%</span></td>          
-        </tr>
-        <tr>          
-          <td><span id="cv05">CV 05</span></td>
-          <td><span id="cvn05">%cvvalue%</span></td>
-          <td><span id="cv06">CV 06</span></td>
-          <td><span id="cvn06">%cvvalue%</span></td>
-          <td><span id="cv29">CV 29</span></td>
-          <td><span id="cvn29">%cvvalue%</span></td> 
-        </tr>
-        <tr>
-          <td>Scale</td>          
-          <td><span id="scaleunit">%Scaleunit%</span></td>
-          <td>Diameter [mm]</td>
-          <td><span id="wheeldiameter">%Wheel Diameter%</span></td>
-          <td>V Max [km/h]</td>
-          <td><span id="jmrivmax">%maxspeed%</span></td>
-        </tr>
-      </table></p>
-      </div>      
-      <div class="card">
-            <div class="tool-bar-graph">
-                <button id="testCsv" class="profilebutton">To Csv</button>
-                <input type="file" id="load-speedData-btn" style="display:none" onChange="loadSpeedData(this)"/>
-                <button id="importCsv" class="profilebutton" onClick="loadSpeedDataDlg(this)">Ld Csv</button>
-                <button id="calculate" class="profilebutton" onClick="calcTable(this)">Calc</button>                
-                <button id="saveProfile" class="profilebutton">Throt</button>
-                <p>Profile Test</p>
-            </div>            
-            <canvas id="chart-speed-data" width="600" height="400"></canvas>
-            <p><table class="datatable">
-                <tr>
-                    <th>FW trim</th>
-                    <th>Speed table</th>
-                    <th>BW trim</th>  
-                </tr>
-                <tr>
-                    <td><span id="fwTrim" style='font-size: 8pt;'>%fwTrim%</span></td>
-                    <td><span id="speedTable" style='font-size: 8pt;'>%speedTable%</span></td>
-                    <td><span id="bwTrim" style='font-size: 8pt;'>%bwTrim%</span></td>
-                </tr>
-            </table></p>        
-      </div>
-    </div>
-  </div>
-  <div class="topnav">
-    <p><table class="footertable">
-      <tr>
-        <td>Date / Time</th>
-        <td><span id="datetime">%datetime%</span></th>
-        <td>IP Address</th>
-        <td><span id="ipaddress">%ipaddress%</span></th>
-        <td>Firmware Version</th>
-        <td><span id="fwversion">%fwversion%</span></th>    
-      </tr>
-      <tr>
-        <td>System Uptime</th>
-        <td><span id="systemuptime">%dsystemuptime%</span></th>
-        <td>Signal Strength</th>
-        <td><span id="signalstrength">%signalstrength%</span></th>
-        <td>Available RAM/Flash</th>
-        <td><span id="ramflash">%ramflash%</span></th>    
-      </tr>
-      <tr>
-        <td>Core Temp</th>
-        <td><span id="coretemp">%coretemp%</span></th>
-        <td>Access Point</th>
-        <td><span id="accesspoint">%accesspoint%</span></th>
-        <td>Bat. Voltage</th>
-        <td><span id="batvoltage">%batvoltage%</span></th>    
-      </tr>
-      <tr>
-        <td>Ext Voltage</th>
-        <td><span id="extvoltage">%extvoltage%</span></th>
-        <td></th>
-        <td></th>
-        <td>Bat. Current</th>
-        <td><span id="batcurrent">%batcurrent%</span></th>    
-      </tr>
-    </table></p>
-  </div>
-  <script src="regression.js"></script>
-  <script src="canvasjsascsv.min.js"></script>
-  <script src="SpeedToProfile.js"></script>
-  <script src="papaparse.min.js"></script> 
-  <script src="SpeedMagicDisplay.js"></script>  
-</body>
-</html>)rawliteral";
+// char WebPageSpeedMagic::_html[] PROGMEM = R"rawliteral(
+// <!DOCTYPE HTML><html>
+// <head>
+//   <title>Purple Hat Sensor</title>
+//   <meta name="viewport" content="width=device-width, initial-scale=1">
+//   <link rel="icon" href="data:,">
+//   <link rel="stylesheet" type="text/css" href="style.css">
+//   <script
+//       src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"
+//       integrity="sha512-ElRFoEQdI5Ht6kZvyzXhYG9NqjtkmlkfYk0wr6wHxU9JEHakS7UJZNeml5ALk+8IKlU6jDgMabC3vkumRokgJA=="
+//       crossorigin="anonymous"
+//       referrerpolicy="no-referrer"
+//     ></script>
+//   <style>
+//     .topnav { background-color: #800080; }   
+//     .reading { font-size: 1.4rem; }
+//   </style>
+// </head>
+// <body>
+//    <div class="topnav">
+//     <div class="tool-bar">        
+//         <a href="/">
+//             <button class="btn-group">Track Data</button>
+//         </a>
+//         <a href="/speedmagic">
+//             <button>Speed Magic</button>
+//         </a>
+//         <a href="/update">
+//             <button>FW Update</button>
+//         </a>
+//         <a href="/webserial">
+//             <button>Log</button>
+//         </a>
+//         <h1>Speed Magic</h1>
+//     </div>
+//   </div>
+//   <div class="content">
+//     <div class="card-grid">
+//       <div class="card">
+//         <p><table class="datatable">
+//              <tr>
+//                 <th>Input:</th>
+//                 <th></th>
+//                 <th></th>
+//                 <th></th>
+//                 <th></th>
+//                 <th></th>
+//             </tr>
+//              <tr>
+//                 <td>JMRI File:</td>               
+//                 <td>
+//                     <div class="tool-bar-graph"> 
+//                         <input type="file" id="load-btn" style="display:none" onChange="loadJMRIFile(this)"/>
+//                         <button id="load-button" onClick="loadJMRIDlg(this)">Load</button>
+//                         <button onClick=" resetDistance(this)">Save</button>
+//                     </div>
+//                 </td>
+//                 <td></td>
+//                 <td></td>
+//                 <td></td>
+//                 <td></td>
+//             </tr>
+//             <tr>
+//                 <td>Throttle:</td>               
+//                 <td>
+//                     <div class="tool-bar-graph"> 
+//                         <input type="file" id="load-profile-btn" style="display:none" onChange="loadThrottle(this)"/>
+//                         <button id="load-profile-button" onClick="loadThrottleDlg(this)">Load</button>
+//                         <button id="button">Save</button>
+//                     </div>
+//                 </td>
+//                 <td>Speed Step</td>
+//                 <td><span id="speedstep">%coretemp%</span></td>
+//                 <td>Direction</td>
+//                 <td><span id="direction">%direction%</span></td>
+//             </tr>
+//             <tr>
+//                 <td>Speed Test:</td>
+//                 <td>
+//                     <div class="tool-bar-graph"> 
+//                         <button id="start-speed-test"  onClick="startSpeedTest(this)">Start</button>
+//                         <button id="stop-speed-test" onClick="stopSpeedTest(this)">Stop</button>
+//                     </div>
+//                 </td>
+//                 <td><span>Length [mm]</span></td>
+//                 <td><input type="number" min="1" max="50000" value="13500" onchange="setTrackLength(this)"/></td>
+//                 <td><span>v Max [km/h]</td>
+//                 <td><input id="vMax" type="number" min="1" max="150" value="50" onchange="setTestSpeed(this)"/></td>
+//             </tr>        
+//         <tr>
+//             <th colspan="3">Data</th>
+//             <th colspan="3">Value</th>        
+//         </tr>
+//          <tr>
+//           <td colspan="3">File Name</td>
+//           <td colspan="3"><span id="jmrifilename">%fileName%</span></td>                  
+//         </tr>
+//         <tr>
+//           <td colspan="3">Locomotive</td>
+//           <td colspan="3"><span id="dccloco">%locomotive%</span></td>                   
+//         </tr>
+//          <tr>
+//           <td colspan="3">DCC Address</td>
+//           <td colspan="3"><span id="jmriaddr">%dccaddress%</span></td>
+//         </tr>
+//          <tr>
+//           <td colspan="3">Decoder Brand</td>
+//           <td colspan="3"><span id="decbrand">%brand%</span></td>
+//         </tr>
+//         <tr>
+//           <td colspan="3">Decoder Family</td>
+//           <td colspan="3"><span id="decfamily">%Direction%</span></td>
+//         </tr>
+//         <tr>
+//           <td colspan="3">Decoder Model</td>
+//           <td colspan="3"><span id="decmodel">%Measured Soeed%</span></td>
+//         </tr>        
+//         <tr>
+//           <td><span id="cv02">CV 02</span></td>
+//           <td><span id="cvn02">%cvvalue%</span></td>
+//           <td><span id="cv03">CV 03</span></td>
+//           <td><span id="cvn03">%cvvalue%</span></td>
+//           <td><span id="cv04">CV 04</span></td>
+//           <td><span id="cvn04">%cvvalue%</span></td>          
+//         </tr>
+//         <tr>          
+//           <td><span id="cv05">CV 05</span></td>
+//           <td><span id="cvn05">%cvvalue%</span></td>
+//           <td><span id="cv06">CV 06</span></td>
+//           <td><span id="cvn06">%cvvalue%</span></td>
+//           <td><span id="cv29">CV 29</span></td>
+//           <td><span id="cvn29">%cvvalue%</span></td> 
+//         </tr>
+//         <tr>
+//           <td>Scale</td>          
+//           <td><span id="scaleunit">%Scaleunit%</span></td>
+//           <td>Diameter [mm]</td>
+//           <td><span id="wheeldiameter">%Wheel Diameter%</span></td>
+//           <td>V Max [km/h]</td>
+//           <td><span id="jmrivmax">%maxspeed%</span></td>
+//         </tr>
+//       </table></p>
+//       </div>      
+//       <div class="card">
+//             <div class="tool-bar-graph">
+//                 <button id="testCsv" class="profilebutton">To Csv</button>
+//                 <input type="file" id="load-speedData-btn" style="display:none" onChange="loadSpeedData(this)"/>
+//                 <button id="importCsv" class="profilebutton" onClick="loadSpeedDataDlg(this)">Ld Csv</button>
+//                 <button id="calculate" class="profilebutton" onClick="calcTable(this)">Calc</button>                
+//                 <button id="saveProfile" class="profilebutton">Throt</button>
+//                 <p>Profile Test</p>
+//             </div>            
+//             <canvas id="chart-speed-data" width="600" height="400"></canvas>
+//             <p><table class="datatable">
+//                 <tr>
+//                     <th>FW trim</th>
+//                     <th>Speed table</th>
+//                     <th>BW trim</th>  
+//                 </tr>
+//                 <tr>
+//                     <td><span id="fwTrim" style='font-size: 8pt;'>%fwTrim%</span></td>
+//                     <td><span id="speedTable" style='font-size: 8pt;'>%speedTable%</span></td>
+//                     <td><span id="bwTrim" style='font-size: 8pt;'>%bwTrim%</span></td>
+//                 </tr>
+//             </table></p>        
+//       </div>
+//     </div>
+//   </div>
+//   <div class="topnav">
+//     <p><table class="footertable">
+//       <tr>
+//         <td>Date / Time</th>
+//         <td><span id="datetime">%datetime%</span></td>
+//         <td>IP Address</th>
+//         <td><span id="ipaddress">%ipaddress%</span></td>
+//         <td>Firmware Version</td>
+//         <td><span id="fwversion">%fwversion%</span></td>    
+//       </tr>
+//       <tr>
+//         <td>System Uptime / Cpu Load</td>
+//         <td><span id="systemuptime">%dsystemuptime%</span></td>
+//         <td>Signal Strength</td>
+//         <td><span id="signalstrength">%signalstrength%</span></td>
+//         <td>Available RAM/Flash</td>
+//         <td><span id="ramflash">%ramflash%</span></td>    
+//       </tr>
+//       <tr>
+//         <td>Core Temp</th>
+//         <td><span id="coretemp">%coretemp%</span></td>
+//         <td>Access Point</td>
+//         <td><span id="accesspoint">%accesspoint%</span></td>
+//         <td>Bat. Voltage</td>
+//         <td><span id="batvoltage">%batvoltage%</span></td>    
+//       </tr>
+//       <tr>
+//         <td>Ext Voltage</th>
+//         <td><span id="extvoltage">%extvoltage%</span></td>
+//         <td></td>
+//         <td></td>
+//         <td>Bat. Current</th>
+//         <td><span id="batcurrent">%batcurrent%</span></td>    
+//       </tr>
+//     </table></p>
+//   </div>
+//   <script src="regression.js"></script>
+//   <script src="canvasjsascsv.min.js"></script>
+//   <script src="SpeedToProfile.js"></script>
+//   <script src="papaparse.min.js"></script> 
+//   <script src="SpeedMagicDisplay.js"></script>  
+// </body>
+// </html>)rawliteral";
 
 AsyncWebSocket WebPageSpeedMagic::_ws("/wsspeedmagic");
 AsyncEventSource WebPageSpeedMagic::_events("/eventsspeedmagic");
@@ -373,9 +374,15 @@ void WebPageSpeedMagic::begin(AsyncWebServer *server)
     // Route for root / web page
     server->on("/speedmagic", HTTP_GET, [](AsyncWebServerRequest *request)
     {
-        request->send_P(200,
-            "text/html",
-            _html,
+        // request->send_P(200,
+        //     "text/html",
+        //     _html,
+        //     processor);
+
+        request->send(SPIFFS,
+            "/SpeedMagic.html",
+            String(),
+            false,
             processor);
     });
 
@@ -388,7 +395,7 @@ String WebPageSpeedMagic::processor(const String& var)
     return String();
 }
 
-void WebPageSpeedMagic::loop()
+bool WebPageSpeedMagic::loop()
 {
     if (millis() < _lastMillis)
         _millisRollOver++; // update ms rollover counter
@@ -397,10 +404,11 @@ void WebPageSpeedMagic::loop()
 
     if (_ws.count() == 0)
     {
-        return;
+        return false;
     }
     _ws.cleanupClients();
-    delay(2);
+    
+    bool result = false;
 
     if((millis() - _lastTestTime) > speedTestInterval)
     {
@@ -417,6 +425,7 @@ void WebPageSpeedMagic::loop()
                          "SpeedTableData",
                          millis());
         }
+        result = true;
     }
 
     if ((millis() - _lastTime) > _timerDelay)
@@ -449,7 +458,9 @@ void WebPageSpeedMagic::loop()
         }
 
         _lastTime = millis();
+        result = true;
     }
+    return result;
 }
 
 void WebPageSpeedMagic::GetStats(String& jsonData)
@@ -465,6 +476,7 @@ void WebPageSpeedMagic::GetStats(String& jsonData)
     String formattedTime;
     TimeClient::getFormattedDate(formattedTime);
     Data["systime"] = formattedTime;
+    Data["cpuload"] = CpuUsage::GetCpuLoad();
     Data["freemem"] = String(ESP.getFreeHeap());
     Data["totaldisk"] = String(SPIFFS.totalBytes());
     Data["useddisk"] = String(SPIFFS.usedBytes());

@@ -1,8 +1,6 @@
 var DataElementTemplate = {"x":0,"y":0, "m":0};
 
-
-function SpeedDataToProfile(chart, fileName, buttonCsv) {
-    
+function SpeedDataToProfile(chart, fileName, buttonCsv) {    
     var buttonCsv = document.getElementById(buttonCsv);
     buttonCsv.addEventListener("click", function () {
         parseProfile({

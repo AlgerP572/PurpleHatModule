@@ -5,10 +5,12 @@
 #include "WebServer.h"
 #include "WebPageTrackMeasuring.h"
 #include "WebPageSpeedMagic.h"
+#include "WebPageWifiLog.h"
 #include "WifiConnection.h"
 #include "WifiSerialDebug.h"
 #include "WifiFirmware.h"
 #include "NTPTimeClient.h"
+#include "CpuUsage.h"
 
 #include "DigitraxBuffersModule.h"
 #include "PurpleHatModule.h"
@@ -89,14 +91,16 @@ void setup()
     // The next line starts the servcies required for OTA
     // logging. Anything using OTA logging including web
     // pages must be after this line.
-    Log::begin(server);
+    Log::begin(WebPageWifiLog::GetEvents());
   
     // Start supported services
     WebPageTrackMeasuring::begin(server);
-    WebPageSpeedMagic::begin(server);    
+    WebPageSpeedMagic::begin(server);
+    WebPageWifiLog::begin(server);    
     WifiFirmware::begin(server);
     WebServer::begin();
-  
+
+    CpuUsage::setup();  
 
     // Start underlying hardware modules
     DigitraxBuffersModule::setup(sendMsg);
@@ -105,23 +109,31 @@ void setup()
          
     // Leave this last so when you see this on the M5 screen you know
     // that the M5 is good to go...     
-    M5.Lcd.println("HTTP started");    
+    M5.Lcd.println("HTTP started"); 
+
+    // After this point use Serial logging functions as
+    // spareingly as possible.  The Log class should handle
+    // as much as the serial traffic as possible.  This
+    // will avoid race conditions since it it Multi-task safe.
+    Log::setup();       
 }
 
 void loop()
 { 
-    u32_t time = millis();    
+    u32_t currentTime = millis();
 
     if(!TimeClient::update())
     {
         TimeClient::forceUpdate();
     }
     
-    if ((time - _lastTime) > _timerDelay)
+    if ((currentTime - _lastTime) > _timerDelay)
     {
+        Log::TakeMultiPrintSection();
         Log::print("Time: ", LogLevel::WATCHDOG);
-        Log::println(time, LogLevel::WATCHDOG);
-        _lastTime = time;
+        Log::println(currentTime, LogLevel::WATCHDOG);
+        Log::GiveMultiPrintSection();
+        _lastTime = currentTime;
         
         // The formattedDate comes with the following format:
         // 2018-05-28T16:00:13Z
@@ -131,16 +143,28 @@ void loop()
         Log::println(formattedTime, LogLevel::WATCHDOG);
     }
 
-    delay(2);
-    WebPageTrackMeasuring::loop();
-    delay(2);
-    WebPageSpeedMagic::loop();
-    delay(2);   
-    WiThrottleModule::loop();
-    delay(2);
-    DigitraxBuffersModule::loop();
+    if(WebPageTrackMeasuring::loop() == false)
+    if(WebPageSpeedMagic::loop() == false)
+    if(WiThrottleModule::loop() == false)
+    if(DigitraxBuffersModule::loop() == false)
+    if(WebPageWifiLog::loop() == false)
+    if(Log::loop() == false);
+    // The above odd if statement is trying to stagger the tasks
+    // so they run semi round robin one at at time...
 
-    // This will "feed the watchdog".
-    delay(2);
-    return;  
+    // Giving the maximum time for other taks to execute.
+    // Trying to keep this loop running at 10 Hz to service
+    // UI requests web socket events etc.
+    u32_t endTime = millis();
+    u32_t loopTime = endTime - currentTime;
+
+    Log::TakeMultiPrintSection();
+    Log::print("loopTime: ", LogLevel::LOOP);
+    Log::println((int) loopTime, LogLevel::LOOP);
+    Log::GiveMultiPrintSection();
+
+    long loopTaskTime = 100u - loopTime;
+    long loopDelay = std::max(loopTaskTime, (long) 100);
+   
+    delay(loopDelay);
 }

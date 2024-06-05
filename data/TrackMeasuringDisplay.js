@@ -73,7 +73,7 @@ function  UpdateFooter()
   document.getElementById("ipaddress").innerHTML = statsData.ipaddress;
   document.getElementById("fwversion").innerHTML = statsData.version;
   
-  document.getElementById("systemuptime").innerHTML = formatTime(Math.trunc(statsData.uptime/1000)); 
+  document.getElementById("systemuptime").innerHTML = formatTime(Math.trunc(statsData.uptime/1000)) + ' / ' + statsData.cpuload.toFixed(2) + '%'; 
   document.getElementById("signalstrength").innerHTML = statsData.sigstrength  + " dBm";
   document.getElementById("ramflash").innerHTML = statsData.freemem + " / " + statsData.freedisk + " Bytes";
 

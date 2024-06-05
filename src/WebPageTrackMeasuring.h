@@ -12,7 +12,7 @@ class WebPageTrackMeasuring
 {
 
 private: 
-    static char _html[];
+    //static char _html[];
     static AsyncWebSocket _ws;
     static AsyncEventSource _events;
     static int _millisRollOver;
@@ -31,7 +31,7 @@ private:
 
 public:
     static void begin(AsyncWebServer* server);
-    static void loop();
+    static bool loop();
 };
 
 #endif
