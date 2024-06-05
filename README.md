@@ -29,11 +29,10 @@ the M5 from the battery.
 
 ![image](https://github.com/AlgerP572/PurpleHatModule/assets/13104848/e121b220-d1f1-422f-9402-e60637b5293a)
 
-```
-Note: This is Purple hat only other hats have been removed and only a subset of the features are supprted.
-This was to make flash memory space available for the the over the air FW download and over the air debug
-logging.
-```
+> [!NOTE]
+> This is Purple hat only other hats have been removed and only a subset of the features are supported.
+> This was to make flash memory space available for the the over the air FW download and over the air debug
+> logging.
 
 # Building / Compiling PurpleHatModule
 The purple hat module code has been converted to a platform.io project hosted by microsoft visual studio code.
@@ -59,27 +58,35 @@ min-spiffs.csv is also provided in the main src folder.
 ; https://docs.platformio.org/page/projectconf.html
 
 [env]
-platform = espressif32
-framework = arduino
-board_build.partitions = min_spiffs.csv
-lib_deps =  https://github.com/m5stack/M5Unified.git                                  
+lib_deps =  https://github.com/m5stack/M5Unified.git
             https://github.com/me-no-dev/AsyncTCP.git
             https://github.com/alanswx/ESPAsyncWiFiManager.git
             https://github.com/me-no-dev/ESPAsyncWebServer.git
-            https://github.com/ayushsharma82/AsyncElegantOTA.git
-            https://github.com/ayushsharma82/WebSerial.git           
+            https://github.com/ayushsharma82/AsyncElegantOTA.git          
             https://github.com/bblanchon/ArduinoJson.git
             https://github.com/adafruit/Adafruit_Sensor.git
             https://github.com/adafruit/Adafruit_BNO055.git
             https://github.com/taranais/NTPClient.git
 
+extra_scripts =  pre:buildscript_versioning.py
+
 [env:m5stick-c]
+platform = espressif32
+framework = arduino
 board = m5stick-c
+board_build.partitions = custom_spiffs.csv
 monitor_speed = 115200
 upload_speed = 115200
 build_type = debug
 monitor_filters = esp32_exception_decoder
 ```
+> [!IMPORTANT]  
+> Even though the documentation reports that a custom partitions file can be in the main project folder
+> I have found that with some versions of platform io it may be required to copy the file to the
+> platform io partitions folder.
+>
+> C:\Users\xxxx\.platformio\packages\framework-arduinoespressif32@3.20003.0\tools\partitions
+
 # Added Features
 The purple hat module SW introduces several additional features not present in the original purple
 hat IOTT version.  These features are designed with G-scale modellers in mind, and help to ease the
