@@ -79,6 +79,13 @@ upload_speed = 115200
 build_type = debug
 monitor_filters = esp32_exception_decoder
 ```
+> [!IMPORTANT]  
+> Even though the documentation reports that a custom partitions file can be in the main project folder
+> I have found that with some versions of platform io it may be required to copy the file to the
+> platform io partitions folder.
+>
+> C:\Users\xxxx\.platformio\packages\framework-arduinoespressif32@3.20003.0\tools\partitions
+
 # Added Features
 The purple hat module SW introduces several additional features not present in the original purple
 hat IOTT version.  These features are designed with G-scale modellers in mind, and help to ease the
