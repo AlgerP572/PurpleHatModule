@@ -375,7 +375,6 @@ void WebPageTrackMeasuring::GetStats(String& jsonData)
     JsonObject Data = doc.createNestedObject("Data");
     float float1 = (_millisRollOver * 4294967296) + millis(); // calculate millis including rollovers
     Data["uptime"] = round(float1);
-
    
     String formattedTime;
     TimeClient::getFormattedDate(formattedTime);

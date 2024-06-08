@@ -20,14 +20,17 @@
   <div class="topnav">
     <div class="tool-bar">        
         <a href="/">
-            <button class="btn-group">DCC Data</button>
-        </a>       
+            <button class="btn-group">Track Data</button>
+        </a>
+        <a href="/speedmagic">
+            <button>Speed Magic</button>
+        </a>
         <a href="/update">
             <button>FW Update</button>
-        </a>        
+        </a>
         <a href="/wifilog">
             <button>Wifi Log</button>
-        </a> 
+        </a>
         <h1>WiFi Log Viewer</h1>
     </div>
   </div>
@@ -90,31 +93,39 @@
   </div>
   <div class="topnav">
     <p><table class="footertable">
-      <tr>
-        <td>Date / Time</td>
-        <td><span id="datetime">%datetime%</span></td>
-        <td>IP Address</td>
-        <td><span id="ipaddress">%ipaddress%</span></td>
-        <td>Firmware Version</td>
-        <td><span id="fwversion">%fwversion%</span></td    
-      </tr>
-      <tr>
-        <td>System Uptime / Cpu Load</td>
-        <td><span id="systemuptime">%dsystemuptime%</span></td>
-        <td>Signal Strength</td>
-        <td><span id="signalstrength">%signalstrength%</span></td>
-        <td>Available RAM/Flash</td>
-        <td><span id="ramflash">%ramflash%</span></td>    
-      </tr>
-      <tr>
-        <td>Core Temp</td>
-        <td><span id="coretemp">%coretemp%</span></td>
-        <td>Access Point</td>
-        <td><span id="accesspoint">%accesspoint%</span></td>
-        <td>Available SPIFFS</td>
-        <td><span id="spiffs">%spiffs%</span></td>    
-      </tr>      
-    </table></p>
+        <tr>
+          <td>Date / Time</td>
+          <td><span id="datetime">%datetime%</span></td>
+          <td>IP Address</td>
+          <td><span id="ipaddress">%ipaddress%</span></td>
+          <td>Firmware Version</td>
+          <td><span id="fwversion">%fwversion%</span></td>    
+        </tr>
+        <tr>
+          <td>System Uptime / Cpu Load</td>
+          <td><span id="systemuptime">%dsystemuptime%</span></td>
+          <td>Signal Strength</td>
+          <td><span id="signalstrength">%signalstrength%</span></td>
+          <td>Available RAM/Flash</td>
+          <td><span id="ramflash">%ramflash%</span></td>    
+        </tr>
+        <tr>
+          <td>Core Temp</td>
+          <td><span id="coretemp">%coretemp%</span></td>
+          <td>Access Point</td>
+          <td><span id="accesspoint">%accesspoint%</span></td>
+          <td>Bat. Voltage</td>
+          <td><span id="batvoltage">%batvoltage%</span></td>    
+        </tr>
+        <tr>
+          <td>Ext Voltage</td>
+          <td><span id="extvoltage">%extvoltage%</span></td>
+          <td></td>
+          <td></td>
+          <td>Bat. Current</td>
+          <td><span id="batcurrent">%batcurrent%</span></td>    
+        </tr>
+      </table></p>
   </div>
     <script src="canvasjsascsv.min.js"></script>
     <script src="papaparse.min.js"></script> 

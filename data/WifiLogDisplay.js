@@ -176,11 +176,14 @@ function  UpdateFooter()
   
   document.getElementById("systemuptime").innerHTML = formatTime(Math.trunc(statsData.uptime/1000)) + ' / ' + statsData.cpuload.toFixed(2) + '%'; 
   document.getElementById("signalstrength").innerHTML = statsData.sigstrength  + " dBm";
-  document.getElementById("ramflash").innerHTML = statsData.freemem + " / " + statsData.freeflash + " Bytes";
+  document.getElementById("ramflash").innerHTML = statsData.freemem + " / " + statsData.freedisk + " Bytes";
 
   document.getElementById("coretemp").innerHTML = statsData.temp.toFixed(2) + "\u00B0C"; 
   document.getElementById("accesspoint").innerHTML = statsData.apname;
-  document.getElementById("spiffs").innerHTML = statsData.freedisk + " / " + statsData.totaldisk + "Bytes";
+  document.getElementById("batvoltage").innerHTML = statsData.ubat.toFixed(2) + " V";
+
+  document.getElementById("extvoltage").innerHTML = statsData.uin.toFixed(2) + " V";
+  document.getElementById("batcurrent").innerHTML = statsData.ibat.toFixed(2) + " mA";  
 }
 
 if (!!window.EventSource) {
