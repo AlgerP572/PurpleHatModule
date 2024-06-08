@@ -86,6 +86,8 @@ monitor_filters = esp32_exception_decoder
 > platform io partitions folder.
 >
 > C:\Users\xxxx\.platformio\packages\framework-arduinoespressif32@3.20003.0\tools\partitions
+>
+> i.e. manually copy custom_spiffs.csv to the above folder
 
 # Added Features
 The purple hat module SW introduces several additional features not present in the original purple
