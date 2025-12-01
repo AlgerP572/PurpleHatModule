@@ -45,6 +45,7 @@ void WiThrottleModule::begin()
 
 bool WiThrottleModule::loop()
 {
+    Log::println("WiThrot Loop", LogLevel::LOOP);
     _lbClient->processLoop();
 
     // TODO: can this be optimized.

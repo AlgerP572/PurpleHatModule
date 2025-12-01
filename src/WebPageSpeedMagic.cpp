@@ -425,6 +425,8 @@ bool WebPageSpeedMagic::loop()
                          "SpeedTableData",
                          millis());
         }
+        
+        _lastTestTime = millis();
         result = true;
     }
 
